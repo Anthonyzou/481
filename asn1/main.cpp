@@ -18,9 +18,12 @@ const long PROCESSORS = 3;//sysconf(_SC_NPROCESSORS_ONLN);
 const long totalElements = 36;
 const auto sampleIntervals = totalElements/(PROCESSORS*PROCESSORS);
 
-std::promise<vec> phase2Promise;
-std::shared_future<vec> phase2Vector(phase2Promise.get_future());
+vector<future<vec>> phase1Results;
+promise<vec> phase2Promise;
+shared_future<vec> phase2Vector(phase2Promise.get_future());
+vector<vec> phase4[PROCESSORS];
 
+mutex m;
 vec randomArray(long size){
     auto a = default_random_engine(seed);
     vec v;
@@ -35,28 +38,39 @@ vec randomArr = {
         21,13,8,35,12,29,6,3,4,14,22,15,32,10,26,31,20,5
 };
 
-void mainThread(promise<vec> p, const int from, const int end){
+void mainThread(const int id, promise<vec> prom,const int from, const int end){
+    //PHASE 1
     std::sort(&randomArr[from], &randomArr[end]);
     vec phase1Arr;
     for(auto i = from; i < end; i+=sampleIntervals){
         phase1Arr.push_back(randomArr[i]);
     }
-    p.set_value(phase1Arr);
+    prom.set_value(phase1Arr);
 
-    //PHASE 2 RESULTS
+    //PHASE 3
     stringstream s;
-    for(auto &i: phase1Arr){
-        s << i << " ";
-    }
-    s << endl;
 
     auto pivots = phase2Vector.get();
-    for(auto &i: pivots){
-        s<< i << " ";
+    auto p = (pivots.front());
+    int idx = 0;
+    for(auto i = from; i < end; i++){
+        auto k = randomArr[i];
+        vec sub;
+        if(p < k && pivots.size() > 0){
+            pop_front(pivots);
+            p = (pivots.front());
+            s << endl;
+            phase4[idx].push_back(sub);
+            idx++;
+        }
+        sub.push_back(k);
+        s << k << " ";
     }
-    s << endl;
-    cout << s.str();
 
+    s << endl;
+    m.lock();
+    cout << s.str();
+    m.unlock();
 }
 
 int main() {
@@ -64,19 +78,18 @@ int main() {
     cout << "NUM processors " << PROCESSORS << endl;
     auto begin = std::chrono::steady_clock::now();
 
-    //PHASE ONE
-    vector<future<vec>> phase1Results;
+    //CREATE THREADS
     for(int i = 0; i < PROCESSORS; i++) {
-        promise<vec> p;
-        auto f = p.get_future();
+        promise<vec> phase1Prom;
+        auto f = phase1Prom.get_future();
         phase1Results.push_back(move(f));
-        threads[i] = std::thread(&mainThread, move(p), i * numElements, (i + 1) * numElements);
+        threads[i] = std::thread(&mainThread, i, move(phase1Prom), i * numElements, (i + 1) * numElements);
     }
 
     //PHASE TWO
     vec results, subResults;
-    for(auto &t: phase1Results){
-        auto subArrays = t.get();
+    for(auto &result: phase1Results){
+        auto subArrays = result.get();
         results.insert(results.end(), subArrays.begin(), subArrays.end());
     }
     sort(results.begin(), results.end());
