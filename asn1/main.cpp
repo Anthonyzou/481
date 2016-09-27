@@ -15,7 +15,6 @@ typedef vector<unsigned long> vec;
 const int numElements = 36/3;
 const int seed = 42;
 const long PROCESSORS = 3;
-//const unsigned procs = thread::hardware_concurrency();
 const long totalElements = 36;
 const auto sampleIntervals = totalElements/(PROCESSORS*PROCESSORS);
 
@@ -88,6 +87,12 @@ void mainThread(const int id, promise<vec> prom,const int from, const int end){
 }
 
 int main() {
+    shuffle(randomArr.begin(), randomArr.end(), std::default_random_engine(seed));
+    for(auto &t : randomArr){
+        cout << t << " " ;
+    }
+    cout << endl;
+
     vector<std::thread> threads;
     vector<future<vec>> phase1Results;
 
@@ -128,7 +133,7 @@ int main() {
         }
     cout << endl;
 
-    auto end = std::chrono::steady_clock::now();
-    std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() <<std::endl;
+    auto end = chrono::steady_clock::now();
+    std::cout << "Time difference = " << chrono::duration_cast<chrono::microseconds>(end - begin).count() << std::endl;
     return 0;
 }
