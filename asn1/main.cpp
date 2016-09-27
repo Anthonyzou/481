@@ -26,7 +26,6 @@ vec phase4[PROCESSORS];
 std::mutex p4, p4v[PROCESSORS];
 std::condition_variable cv;
 int threadsDone = 0 ;
-mutex m;
 
 vec randomArray(long size){
     auto a = default_random_engine(seed);
@@ -52,8 +51,6 @@ void mainThread(const int id, promise<vec> prom,const int from, const int end){
     prom.set_value(phase1Arr);
 
     //PHASE 3
-    stringstream s;
-
     auto pivots = phase2Vector.get();
     auto pivot = (pivots.front());
     auto idx = 0;
@@ -86,15 +83,8 @@ void mainThread(const int id, promise<vec> prom,const int from, const int end){
     std::unique_lock<std::mutex> lk(p4);
     cv.wait(lk, [](){return threadsDone == PROCESSORS;});
 
+    //PHASE 4 SORT
     sort(phase4[id].begin(), phase4[id].end());
-    for(auto &t : phase4[id]){
-        s << t << " " ;
-    }
-    s << endl;
-
-    m.lock();
-    cout << s.str();
-    m.unlock();
 }
 
 int main() {
@@ -112,7 +102,7 @@ int main() {
         threads.push_back(std::thread(&mainThread, i, move(phase1Prom), i * numElements, (i + 1) * numElements));
     }
 
-    //PHASE TWO
+    //PHASE 2
     vec results, subResults;
     for(auto &result: phase1Results){
         auto subArrays = result.get();
@@ -120,16 +110,25 @@ int main() {
     }
     sort(results.begin(), results.end());
 
+    //PHASE 2 GET PIVOT POINTS
     for(auto i = PROCESSORS; i < results.size(); i += PROCESSORS){
         subResults.push_back(results[i]);
     }
     phase2Promise.set_value(subResults);
 
+    //END PHASE 4
     for(auto &it : threads) {
         it.join();
     }
 
-    auto end= std::chrono::steady_clock::now();
+    //COMBINE RESULTS FROM PHASE 4
+    for(int id = 0; id < PROCESSORS; id++)
+        for(auto &t : phase4[id]){
+            cout << t << " " ;
+        }
+    cout << endl;
+
+    auto end = std::chrono::steady_clock::now();
     std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() <<std::endl;
     return 0;
 }
