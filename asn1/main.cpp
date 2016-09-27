@@ -14,16 +14,20 @@ typedef vector<unsigned long> vec;
 
 const int numElements = 36/3;
 const int seed = 42;
-const long PROCESSORS = 3;//sysconf(_SC_NPROCESSORS_ONLN);
+const long PROCESSORS = 3;
+//const unsigned procs = thread::hardware_concurrency();
 const long totalElements = 36;
 const auto sampleIntervals = totalElements/(PROCESSORS*PROCESSORS);
 
-vector<future<vec>> phase1Results;
 promise<vec> phase2Promise;
 shared_future<vec> phase2Vector(phase2Promise.get_future());
-vector<vec> phase4[PROCESSORS];
 
+vec phase4[PROCESSORS];
+std::mutex p4, p4v[PROCESSORS];
+std::condition_variable cv;
+int threadsDone = 0 ;
 mutex m;
+
 vec randomArray(long size){
     auto a = default_random_engine(seed);
     vec v;
@@ -51,30 +55,52 @@ void mainThread(const int id, promise<vec> prom,const int from, const int end){
     stringstream s;
 
     auto pivots = phase2Vector.get();
-    auto p = (pivots.front());
-    int idx = 0;
+    auto pivot = (pivots.front());
+    auto idx = 0;
+    vec results;
     for(auto i = from; i < end; i++){
         auto k = randomArr[i];
-        vec sub;
-        if(p < k && pivots.size() > 0){
+        if(pivot < k && pivots.size() > 0){
             pop_front(pivots);
-            p = (pivots.front());
-            s << endl;
-            phase4[idx].push_back(sub);
+            pivot = (pivots.front());
+
+            p4v[idx].lock();
+            phase4[idx].insert(phase4[idx].end(), results.begin(), results.end());
+            p4v[idx].unlock();
+
+            results.clear();
             idx++;
         }
-        sub.push_back(k);
-        s << k << " ";
+        results.push_back(k);
+    }
+    p4v[idx].lock();
+    phase4[idx].insert(phase4[idx].end(), results.begin(), results.end());
+    p4v[idx].unlock();
+
+    {
+        std::unique_lock<std::mutex> lk(p4);
+        threadsDone++;
+        cv.notify_all();
     }
 
+    std::unique_lock<std::mutex> lk(p4);
+    cv.wait(lk, [](){return threadsDone == PROCESSORS;});
+
+    sort(phase4[id].begin(), phase4[id].end());
+    for(auto &t : phase4[id]){
+        s << t << " " ;
+    }
     s << endl;
+
     m.lock();
     cout << s.str();
     m.unlock();
 }
 
 int main() {
-    std::thread threads[PROCESSORS];
+    vector<std::thread> threads;
+    vector<future<vec>> phase1Results;
+
     cout << "NUM processors " << PROCESSORS << endl;
     auto begin = std::chrono::steady_clock::now();
 
@@ -83,7 +109,7 @@ int main() {
         promise<vec> phase1Prom;
         auto f = phase1Prom.get_future();
         phase1Results.push_back(move(f));
-        threads[i] = std::thread(&mainThread, i, move(phase1Prom), i * numElements, (i + 1) * numElements);
+        threads.push_back(std::thread(&mainThread, i, move(phase1Prom), i * numElements, (i + 1) * numElements));
     }
 
     //PHASE TWO
@@ -99,9 +125,8 @@ int main() {
     }
     phase2Promise.set_value(subResults);
 
-
-    for(int it = 0; it < PROCESSORS; it++) {
-        threads[it].join();
+    for(auto &it : threads) {
+        it.join();
     }
 
     auto end= std::chrono::steady_clock::now();
