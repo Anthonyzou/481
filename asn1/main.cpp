@@ -12,9 +12,7 @@ using namespace std;
 
 inline void handleChunk(int idx, vec results){
     std::unique_lock<std::mutex> lk(p4[idx]);
-    p4v[idx].lock();
     phase4[idx].insert(phase4[idx].end(), results.begin(), results.end());
-    p4v[idx].unlock();
     threadsDone[idx]++;
     p4CV[idx].notify_one();
 }
