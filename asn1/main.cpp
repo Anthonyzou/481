@@ -9,9 +9,8 @@
 
 using namespace std;
 
-
 inline void handleChunk(int idx, vec results){
-    std::unique_lock<std::mutex> lk(p4[idx]);
+    unique_lock<std::mutex> lk(p4[idx]);
     phase4[idx].insert(phase4[idx].end(), results.begin(), results.end());
     threadsDone[idx]++;
     p4CV[idx].notify_one();
@@ -19,7 +18,7 @@ inline void handleChunk(int idx, vec results){
 
 void worker(const int id, promise<vec> prom, const int from, const int end){
     //PHASE 1
-    std::sort(&randomArr[from], &randomArr[end]);
+    sort(&randomArr[from], &randomArr[end]);
     vec phase1Arr;
     for(auto i = from; i < end; i += sampleIntervals){
         phase1Arr.push_back(randomArr[i]);
@@ -36,13 +35,15 @@ void worker(const int id, promise<vec> prom, const int from, const int end){
         if(pivot < k && pivots.size() > idx){
             handleChunk(idx, results);
             results.clear();
-            pivot = pivots[++idx];
+            ++idx;
+            if(idx < pivots.size())
+                pivot = pivots[idx];
         }
         results.push_back(k);
     }
     handleChunk(idx, results);
 
-    std::unique_lock<std::mutex> lk(p4[id]);
+    unique_lock<std::mutex> lk(p4[id]);
     p4CV[id].wait(lk, [id](){return threadsDone[id] == PROCESSORS;});
 
     //PHASE 4 SORT
