@@ -19,13 +19,12 @@ const long PROCESSORS = 3;
 const long totalElements = 36;
 const auto sampleIntervals = totalElements/(PROCESSORS*PROCESSORS);
 
-promise<vec> phase2Promise;
-shared_future<vec> phase2Vector(phase2Promise.get_future());
+promise<vec> phase2Promise; shared_future<vec> phase2Vector(phase2Promise.get_future());
 
-vec phase4[PROCESSORS];
-std::mutex p4[PROCESSORS], p4v[PROCESSORS];
-std::condition_variable cv[PROCESSORS];
-int threadsDone[PROCESSORS] = {0} ;
+vector<vec> phase4(PROCESSORS);
+vector<mutex> p4(PROCESSORS), p4v(PROCESSORS);
+vector<condition_variable> cv(PROCESSORS);
+vector<int> threadsDone(PROCESSORS, 0) ;
 
 vec randomArray(long size){
     auto a = default_random_engine(seed);

@@ -15,7 +15,7 @@ inline void handleChunk(int idx, vec results){
     phase4[idx].insert(phase4[idx].end(), results.begin(), results.end());
     p4v[idx].unlock();
     threadsDone[idx]++;
-    cv[idx].notify_all();
+    cv[idx].notify_one();
 }
 
 void worker(const int id, promise<vec> prom, const int from, const int end){
@@ -47,7 +47,7 @@ void worker(const int id, promise<vec> prom, const int from, const int end){
     cv[id].wait(lk, [id](){return threadsDone[id] == PROCESSORS;});
 
     //PHASE 4 SORT
-    merge_sort(phase4[id].begin(), phase4[id].end());
+    sort(phase4[id].begin(), phase4[id].end());
 }
 
 int main() {
@@ -81,15 +81,15 @@ int main() {
 
     //END PHASE 4
     for(auto &it : threads) it.join();
+    auto end = chrono::steady_clock::now();
 
     //COMBINE RESULTS FROM PHASE 4
-    for(int id = 0; id < PROCESSORS; id++)
-        for(auto &t : phase4[id])
+    for(auto &id : phase4)
+        for(auto &t : id)
             cout << t << " " ;
 
     cout << endl;
 
-    auto end = chrono::steady_clock::now();
     std::cout << "Time difference = " << chrono::duration_cast<chrono::microseconds>(end - begin).count() << std::endl;
     return 0;
 }
