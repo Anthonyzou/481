@@ -6,9 +6,9 @@
 #include <sstream>
 #include <future>
 #include "main.h"
-#include <algorithm>
 
 using namespace std;
+
 
 inline void handleChunk(int idx, vec results){
     std::unique_lock<std::mutex> lk(p4[idx]);
