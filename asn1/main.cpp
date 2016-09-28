@@ -52,9 +52,9 @@ void worker(const int id, promise<vec> prom, const int from, const int end){
 }
 
 int main() {
+    pthread_setconcurrency(PROCESSORS);
     vector<std::thread> threads;
     vector<future<vec>> phase1Results;
-    pthread_setconcurrency(PROCESSORS);
     vec results, subResults, phase4Results;
 
     cout << "NUM processors " << thread::hardware_concurrency() << endl;
