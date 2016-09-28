@@ -18,7 +18,7 @@ inline void handleChunk(int idx, vec results);
 
 //thread::hardware_concurrency()
 
-const int numElements = 2000000;
+const int numElements = 10000000;
 const int seed = 42;
 const auto PROCESSORS = thread::hardware_concurrency();
 const long totalElements = PROCESSORS*numElements;
