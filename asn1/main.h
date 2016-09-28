@@ -30,6 +30,7 @@ vector<vec> phase4(PROCESSORS);
 vector<mutex> p4(PROCESSORS), p4v(PROCESSORS);
 vector<condition_variable> p4CV(PROCESSORS);
 vector<int> threadsDone(PROCESSORS, 0) ;
+vec randomArr = randomArray(totalElements);
 
 vec randomArray(long size){
 //    auto a = default_random_engine(seed);
@@ -39,8 +40,6 @@ vec randomArray(long size){
         v[i]= (std::rand());
     return v;
 }
-
-vec randomArr = randomArray(totalElements);
 
 // https://en.wikibooks.org/wiki/Algorithm_Implementation/Sorting/Merge_sort
 template <typename BidirIt, typename Compare = std::less<unsigned long>>

@@ -87,19 +87,13 @@ int main() {
     auto end = chrono::steady_clock::now();
 
     //COMBINE RESULTS FROM PHASE 4
-    stringstream s;
-    for(auto &id : phase4){
+    for(auto &id : phase4)
         phase4Results.insert(phase4Results.end(), id.begin(), id.end());
-//        for(auto &t : id){
-//
-//            s << t << " " ;
-//        }
-    }
 
-//    s << endl;
-    s << is_sorted(phase4Results.begin(), phase4Results.end()) << endl;
-
-    s << "Time difference = " << chrono::duration_cast<chrono::microseconds>(end - begin).count() << std::endl;
+    stringstream s;
+    s << "is sorted " << ((is_sorted(phase4Results.begin(), phase4Results.end()) == 1)?"true":"false") << endl
+      << "is sorted " << ((is_sorted(randomArr.begin(), randomArr.end()) == 1)?"true":"false") << endl
+      << "Time difference = " << chrono::duration_cast<chrono::microseconds>(end - begin).count() << endl;
     cout << s.str();
     return 0;
 }
