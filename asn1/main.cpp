@@ -37,7 +37,7 @@ void worker(const int id, promise<vec> prom, const int from, const int end){
         if(pivot < k && pivots.size() > idx){
             handleChunk(idx, results);
             results.clear();
-            pivot = pivots[idx++];
+            pivot = pivots[++idx];
         }
         results.push_back(k);
     }
