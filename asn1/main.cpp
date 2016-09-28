@@ -56,8 +56,8 @@ int main() {
     vector<future<vec>> phase1Results;
     vec results, subResults, phase4Results;
 
-    cout << "NUM processors " << thread::hardware_concurrency() << endl;
-    cout << "totalElements " << totalElements << endl;
+    cout << "NUM processors " << thread::hardware_concurrency() << endl
+         << "totalElements " << totalElements << endl;
 
     auto begin = std::chrono::steady_clock::now();
     //CREATE THREADS
@@ -91,9 +91,8 @@ int main() {
         phase4Results.insert(phase4Results.end(), id.begin(), id.end());
 
     stringstream s;
-    s << "original array is sorted " << ((is_sorted(randomArr.begin(), randomArr.end()) == 1) ? "true" : "false") << endl
-      << "new array is sorted " << ((is_sorted(phase4Results.begin(), phase4Results.end()) == 1) ? "true" : "false") << endl
-      << "Time difference = " << chrono::duration_cast<chrono::milliseconds>(end - begin).count() << endl;
+    s << "new array is sorted " << ((is_sorted(phase4Results.begin(), phase4Results.end()) == 1) ? "true" : "false") << endl
+      << chrono::duration_cast<chrono::milliseconds>(end - begin).count() << endl;
     cout << s.str();
     return 0;
 }
