@@ -91,7 +91,6 @@ int main() {
     for(auto &id : phase4)
         phase4Results.insert(phase4Results.end(), id.begin(), id.end());
 
-//    cout << "new array is sorted " << ((is_sorted(phase4Results.begin(), phase4Results.end()) == 1) ? "true" : "false") << endl;
     cout << chrono::duration_cast<chrono::milliseconds>(end - begin).count() << endl;
-    return 0;
+    return ((is_sorted(phase4Results.begin(), phase4Results.end()) == 1) ? 0 : 1);
 }
