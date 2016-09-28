@@ -1,6 +1,6 @@
 project(asn1)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread -g")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread -O3")
 
 set(SOURCE_FILES main.cpp)
 add_executable(asn1 ${SOURCE_FILES})
