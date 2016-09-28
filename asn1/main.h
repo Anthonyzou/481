@@ -14,14 +14,14 @@ typedef long vecType;
 typedef vector<vecType> vec;
 
 // function prototypes
-vec randomArray(long size);
+vec randomArray(unsigned long size);
 void worker(const int id, promise<vec> prom, const int from, const int end);
 inline void handleChunk(int idx, vec results);
 
 // Global constants
-const int numElements = 50000000, seed = 42;
+const int numElements = 10000000, seed = 42;
 const auto PROCESSORS = thread::hardware_concurrency();
-const long totalElements = PROCESSORS*numElements;
+const unsigned long totalElements = PROCESSORS*numElements;
 const auto sampleIntervals = totalElements/(PROCESSORS*PROCESSORS);
 
 // Global shared variables
@@ -37,12 +37,12 @@ vector<int> threadsDone(PROCESSORS, 0);
 // random array
 vec randomArr = randomArray(totalElements);
 
-vec randomArray(long size) {
+vec randomArray(unsigned long size) {
     default_random_engine generator;
     generator.seed(seed);
     uniform_int_distribution<vecType> dis(1, LONG_MAX);
 
-    vec v((unsigned long) size);
+    vec v(size);
     for(auto i = 0; i < size; i++)
         v[i] = dis(generator);
     return v;

@@ -5,6 +5,8 @@
 #include <mutex>
 #include <sstream>
 #include <future>
+#include <fstream>
+#include <iomanip>
 #include "main.h"
 
 using namespace std;
@@ -56,8 +58,7 @@ int main() {
     vector<future<vec>> phase1Results;
     vec results, subResults, phase4Results;
 
-    cout << "NUM processors " << thread::hardware_concurrency() << endl
-         << "totalElements " << totalElements << endl;
+//    cout << "NUM processors " << thread::hardware_concurrency() << endl << "totalElements " << totalElements << endl;
 
     auto begin = std::chrono::steady_clock::now();
     //CREATE THREADS
@@ -90,9 +91,7 @@ int main() {
     for(auto &id : phase4)
         phase4Results.insert(phase4Results.end(), id.begin(), id.end());
 
-    stringstream s;
-    s << "new array is sorted " << ((is_sorted(phase4Results.begin(), phase4Results.end()) == 1) ? "true" : "false") << endl
-      << chrono::duration_cast<chrono::milliseconds>(end - begin).count() << endl;
-    cout << s.str();
+//    cout << "new array is sorted " << ((is_sorted(phase4Results.begin(), phase4Results.end()) == 1) ? "true" : "false") << endl;
+    cout << chrono::duration_cast<chrono::milliseconds>(end - begin).count() << endl;
     return 0;
 }
