@@ -39,7 +39,7 @@ vec randomArray(long size){
     std::uniform_int_distribution<> dis(1, INT32_MAX);
 
     vec v((unsigned long) size);
-    for(int i = 0; i < size; i++)
+    for(auto i = 0; i < size; i++)
         v[i] = dis(gen) ;
     return v;
 }
