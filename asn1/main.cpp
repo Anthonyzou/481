@@ -3,16 +3,16 @@
 #include <random>
 #include <algorithm>
 #include <mutex>
-#include <sstream>
 #include <future>
-#include <fstream>
-#include <iomanip>
 #include "main.h"
 
 using namespace std;
 
+long phase3 = 0;
+typedef chrono::microseconds time_u;
+
 inline void handleChunk(int idx, vec results){
-    unique_lock<std::mutex> lk(p4[idx]);
+    unique_lock<mutex> lk(p4[idx]);
     phase4[idx].insert(phase4[idx].end(), results.begin(), results.end());
     threadsDone[idx]++;
     p4CV[idx].notify_one();
@@ -28,6 +28,7 @@ void worker(const int id, promise<vec> prom, const int from, const int end){
     prom.set_value(phase1Arr);
 
     //PHASE 3
+    auto begin =  chrono::steady_clock::now();
     auto idx = 0;
     auto pivots = phase2Vector.get();
     auto pivot = pivots[idx];
@@ -45,7 +46,9 @@ void worker(const int id, promise<vec> prom, const int from, const int end){
     }
     handleChunk(idx, results);
 
-    unique_lock<std::mutex> lk(p4[id]);
+    phase3 = chrono::duration_cast<time_u>(chrono::steady_clock::now() - begin).count();
+
+    unique_lock<mutex> lk(p4[id]);
     p4CV[id].wait(lk, [id](){return threadsDone[id] == PROCESSORS;});
 
     //PHASE 4 SORT
@@ -54,19 +57,19 @@ void worker(const int id, promise<vec> prom, const int from, const int end){
 
 int main() {
     pthread_setconcurrency(PROCESSORS);
-    vector<std::thread> threads;
+    vector<thread> threads;
     vector<future<vec>> phase1Results;
     vec results, subResults, phase4Results;
 
 //    cout << "NUM processors " << thread::hardware_concurrency() << endl << "totalElements " << totalElements << endl;
 
-    auto begin = std::chrono::steady_clock::now();
+    auto begin = chrono::steady_clock::now();
     //CREATE THREADS
     for(int i = 0; i < PROCESSORS; i++) {
         promise<vec> phase1Prom;
         auto f = phase1Prom.get_future();
         phase1Results.push_back(move(f));
-        threads.push_back(std::thread(&worker, i, move(phase1Prom), i * numElements, (i + 1) * numElements));
+        threads.push_back(thread(&worker, i, move(phase1Prom), i * numElements, (i + 1) * numElements));
     }
 
     //PHASE 2
@@ -74,6 +77,9 @@ int main() {
         auto subArrays = result.get();
         results.insert(results.end(), subArrays.begin(), subArrays.end());
     }
+    cout << chrono::duration_cast<time_u>(chrono::steady_clock::now() - begin).count() << "+";
+
+    auto PHASE2START = chrono::steady_clock::now();
     sort(results.begin(), results.end());
 
     //PHASE 2 GET PIVOT POINTS
@@ -82,15 +88,19 @@ int main() {
         subResults.push_back(results[i]);
 
     phase2Promise.set_value(subResults);
+    cout << chrono::duration_cast<time_u>(chrono::steady_clock::now() - PHASE2START).count() << "+";
 
+    auto PHASE3START = chrono::steady_clock::now();
     //END PHASE 4
     for(auto &it : threads) it.join();
     auto end = chrono::steady_clock::now();
+    cout << phase3/PROCESSORS << "+";
+    cout << chrono::duration_cast<time_u>(chrono::steady_clock::now() - PHASE3START).count() << " ";
 
     //COMBINE RESULTS FROM PHASE 4
     for(auto &id : phase4)
         phase4Results.insert(phase4Results.end(), id.begin(), id.end());
 
-    cout << chrono::duration_cast<chrono::milliseconds>(end - begin).count();
+    cout << chrono::duration_cast<time_u>(end - begin).count();
     return ((is_sorted(phase4Results.begin(), phase4Results.end()) == 1) ? 0 : 1);
 }
