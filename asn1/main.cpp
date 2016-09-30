@@ -1,9 +1,7 @@
-#include <iostream>
-#include <thread>
-#include <random>
-#include <algorithm>
-#include <mutex>
-#include <future>
+// Anthony Ou
+// 1248175
+// cmput 481
+// Oct 5, 2016
 #include "main.h"
 
 using namespace std;
@@ -49,14 +47,38 @@ void worker(const int id, promise<vec> prom, const int from, const int end){
     phase3 = chrono::duration_cast<time_u>(chrono::steady_clock::now() - begin).count();
 
     unique_lock<mutex> lk(p4[id]);
-    p4CV[id].wait(lk, [id](){return threadsDone[id] == PROCESSORS;});
+    p4CV[id].wait(lk, [id](){ return threadsDone[id] == PROCESSORS; });
 
     //PHASE 4 SORT
     merge_sort(phase4[id].begin(), phase4[id].end());
 }
 
-int main() {
-    pthread_setconcurrency(PROCESSORS);
+int main(int argc, char ** argv) {
+    InputParser input(argc, argv);
+    const std::string & argseed = input.getCmdOption("-seed");
+    if(input.cmdOptionExists("-seed")){
+        seed = stoul(argseed,nullptr,0);
+    }
+    const std::string &filename = input.getCmdOption("-size");
+    if (input.cmdOptionExists("-size")){
+        numElements = stoul(filename,nullptr,0);
+    }
+    const std::string &argthreads = input.getCmdOption("-threads");
+    if (input.cmdOptionExists("-threads")){
+        PROCESSORS = stoul(argthreads,nullptr,0);
+    }
+    phase4.resize(PROCESSORS);
+    threadsDone.resize(PROCESSORS,0);
+    vector<mutex> a(PROCESSORS);
+    p4.swap(a);
+    vector<condition_variable> b(PROCESSORS);
+    p4CV.swap(b);
+
+    totalElements = PROCESSORS*numElements;
+    sampleIntervals = totalElements/(PROCESSORS*PROCESSORS);
+
+    randomArr = randomArray(totalElements);
+
     vector<thread> threads;
     vector<future<vec>> phase1Results;
     vec results, subResults, phase4Results;
@@ -101,6 +123,7 @@ int main() {
     for(auto &id : phase4)
         phase4Results.insert(phase4Results.end(), id.begin(), id.end());
 
-    cout << chrono::duration_cast<time_u>(end - begin).count();
+    cout << chrono::duration_cast<time_u>(end - begin).count() <<endl;
+    cout << numElements <<" "<< totalElements <<" "<< PROCESSORS <<" "<< seed;
     return ((is_sorted(phase4Results.begin(), phase4Results.end()) == 1) ? 0 : 1);
 }

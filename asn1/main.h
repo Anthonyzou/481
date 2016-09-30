@@ -1,3 +1,8 @@
+// Anthony Ou
+// 1248175
+// cmput 481
+// Oct 5, 2016
+
 #pragma once
 
 #include <iterator>
@@ -6,6 +11,12 @@
 #include <stdlib.h>
 #include <cstdlib>
 #include <cmath>
+#include <iostream>
+#include <thread>
+#include <random>
+#include <algorithm>
+#include <mutex>
+#include <future>
 #include <climits>
 
 using namespace std;
@@ -19,23 +30,21 @@ void worker(const int id, promise<vec> prom, const int from, const int end);
 inline void handleChunk(int idx, vec results);
 
 // Global constants
-const int numElements = 2000000, seed = 42;
-const auto PROCESSORS = thread::hardware_concurrency();
-const unsigned long totalElements = PROCESSORS*numElements;
-const auto sampleIntervals = totalElements/(PROCESSORS*PROCESSORS);
+unsigned long numElements = 100000, seed = 42, PROCESSORS = thread::hardware_concurrency();
+unsigned long totalElements, sampleIntervals;
 
 // Global shared variables
 // phase 2 globals
 promise<vec> phase2Promise; shared_future<vec> phase2Vector(phase2Promise.get_future());
 
 // phase 4 globals
-vector<vec> phase4(PROCESSORS);
-vector<mutex> p4(PROCESSORS);
-vector<condition_variable> p4CV(PROCESSORS);
-vector<int> threadsDone(PROCESSORS, 0);
+vector<vec> phase4;
+vector<mutex> p4;
+vector<condition_variable> p4CV;
+vector<int> threadsDone;
 
 // random array
-vec randomArr = randomArray(totalElements);
+vec randomArr;
 
 vec randomArray(unsigned long size) {
     default_random_engine generator;
@@ -62,3 +71,28 @@ void merge_sort(BidirIt first, BidirIt last, Compare cmp = Compare {}) {
         std::inplace_merge(first, middle, last, cmp);
     }
 }
+
+// http://stackoverflow.com/questions/865668/how-to-parse-command-line-arguments-in-c
+class InputParser{
+public:
+    InputParser (int &argc, char **argv){
+        for (int i=1; i < argc; ++i)
+            this->tokens.push_back(std::string(argv[i]));
+    }
+    /// @author iain
+    const std::string& getCmdOption(const std::string &option) const{
+        std::vector<std::string>::const_iterator itr;
+        itr =  std::find(this->tokens.begin(), this->tokens.end(), option);
+        if (itr != this->tokens.end() && ++itr != this->tokens.end()){
+            return *itr;
+        }
+        return std::string();
+    }
+    /// @author iain
+    bool cmdOptionExists(const std::string &option) const{
+        return std::find(this->tokens.begin(), this->tokens.end(), option)
+               != this->tokens.end();
+    }
+private:
+    std::vector <std::string> tokens;
+};

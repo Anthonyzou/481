@@ -1,7 +1,7 @@
-To generate make files run
+To generate make file run
 `cmake .`
 
 Then run 
 `make asn1`
-or
+or to run a simple built in sort algorithm.
 `make asn1test`
