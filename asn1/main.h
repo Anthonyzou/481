@@ -28,10 +28,10 @@ typedef vector<vecType> vec;
 vec randomArray(unsigned long size);
 void worker(const int id, promise<vec> prom, const int from, const int end);
 inline void handleChunk(int idx, vec results);
+void init(int argc, char ** argv);
 
 // Global constants
-unsigned long numElements = 100000, seed = 42, PROCESSORS = thread::hardware_concurrency();
-unsigned long totalElements, sampleIntervals;
+unsigned long numElements = 100000, seed = 42, PROCESSORS = thread::hardware_concurrency(), totalElements, sampleIntervals;
 
 // Global shared variables
 // phase 2 globals
@@ -96,3 +96,31 @@ public:
 private:
     std::vector <std::string> tokens;
 };
+
+void init(int argc, char ** argv){
+    InputParser input(argc, argv);
+    const std::string & argseed = input.getCmdOption("-seed");
+    if(input.cmdOptionExists("-seed")){
+        seed = stoul(argseed,nullptr,0);
+    }
+    const std::string &filename = input.getCmdOption("-size");
+    if (input.cmdOptionExists("-size")){
+        numElements = stoul(filename,nullptr,0);
+    }
+    const std::string &argthreads = input.getCmdOption("-threads");
+    if (input.cmdOptionExists("-threads")){
+        PROCESSORS = stoul(argthreads,nullptr,0);
+    }
+
+    phase4.resize(PROCESSORS);
+    threadsDone.resize(PROCESSORS,0);
+    vector<mutex> a(PROCESSORS);
+    p4.swap(a);
+    vector<condition_variable> b(PROCESSORS);
+    p4CV.swap(b);
+
+    totalElements = PROCESSORS*numElements;
+    sampleIntervals = totalElements/(PROCESSORS*PROCESSORS);
+
+    randomArr = randomArray(totalElements);
+}

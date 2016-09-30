@@ -54,30 +54,7 @@ void worker(const int id, promise<vec> prom, const int from, const int end){
 }
 
 int main(int argc, char ** argv) {
-    InputParser input(argc, argv);
-    const std::string & argseed = input.getCmdOption("-seed");
-    if(input.cmdOptionExists("-seed")){
-        seed = stoul(argseed,nullptr,0);
-    }
-    const std::string &filename = input.getCmdOption("-size");
-    if (input.cmdOptionExists("-size")){
-        numElements = stoul(filename,nullptr,0);
-    }
-    const std::string &argthreads = input.getCmdOption("-threads");
-    if (input.cmdOptionExists("-threads")){
-        PROCESSORS = stoul(argthreads,nullptr,0);
-    }
-    phase4.resize(PROCESSORS);
-    threadsDone.resize(PROCESSORS,0);
-    vector<mutex> a(PROCESSORS);
-    p4.swap(a);
-    vector<condition_variable> b(PROCESSORS);
-    p4CV.swap(b);
-
-    totalElements = PROCESSORS*numElements;
-    sampleIntervals = totalElements/(PROCESSORS*PROCESSORS);
-
-    randomArr = randomArray(totalElements);
+    init(argc, argv);
 
     vector<thread> threads;
     vector<future<vec>> phase1Results;
