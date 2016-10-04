@@ -18,11 +18,13 @@
 #include <mutex>
 #include <future>
 #include <climits>
+#include <sstream>
 
 using namespace std;
 
 typedef long vecType;
 typedef vector<vecType> vec;
+typedef chrono::microseconds time_u;
 
 // function prototypes
 vec randomArray(unsigned long size);
@@ -58,56 +60,68 @@ vec randomArray(unsigned long size) {
 }
 
 // https://en.wikibooks.org/wiki/Algorithm_Implementation/Sorting/Merge_sort
-template <typename BidirIt, typename Compare = std::less<vecType>>
+template <typename BidirIt, typename Compare = less<vecType>>
 void merge_sort(BidirIt first, BidirIt last, Compare cmp = Compare {}) {
-    const auto n = std::distance(first, last);
+    const auto n = distance(first, last);
 
     if (n > 1) {
-        const auto middle = std::next(first, n / 2);
+        const auto middle = next(first, n / 2);
 
         merge_sort(first, middle, cmp);
         merge_sort(middle, last, cmp);
 
-        std::inplace_merge(first, middle, last, cmp);
+        inplace_merge(first, middle, last, cmp);
     }
 }
 
-// http://stackoverflow.com/questions/865668/how-to-parse-command-line-arguments-in-c
+// https://stackoverflow.com/questions/865668/how-to-parse-command-line-arguments-in-c
 class InputParser{
 public:
     InputParser (int &argc, char **argv){
         for (int i=1; i < argc; ++i)
-            this->tokens.push_back(std::string(argv[i]));
+            this->tokens.push_back(string(argv[i]));
     }
     /// @author iain
-    const std::string& getCmdOption(const std::string &option) const{
-        std::vector<std::string>::const_iterator itr;
-        itr =  std::find(this->tokens.begin(), this->tokens.end(), option);
+    const string& getCmdOption(const string &option) const{
+        vector<string>::const_iterator itr;
+        itr =  find(this->tokens.begin(), this->tokens.end(), option);
         if (itr != this->tokens.end() && ++itr != this->tokens.end()){
             return *itr;
         }
-        return std::string();
+        return string();
     }
     /// @author iain
-    bool cmdOptionExists(const std::string &option) const{
-        return std::find(this->tokens.begin(), this->tokens.end(), option)
+    bool cmdOptionExists(const string &option) const{
+        return find(this->tokens.begin(), this->tokens.end(), option)
                != this->tokens.end();
     }
 private:
-    std::vector <std::string> tokens;
+    vector <string> tokens;
 };
+
+// https://stackoverflow.com/questions/6097927/is-there-a-way-to-implement-analog-of-pythons-separator-join-in-c
+template <typename Iter>
+string join(Iter begin, Iter end, string const& separator)
+{
+    ostringstream result;
+    if (begin != end)
+        result << *begin++;
+    while (begin != end)
+        result << separator << *begin++;
+    return result.str();
+}
 
 void init(int argc, char ** argv){
     InputParser input(argc, argv);
-    const std::string & argseed = input.getCmdOption("-seed");
+    const string & argseed = input.getCmdOption("-seed");
     if(input.cmdOptionExists("-seed")){
         seed = stoul(argseed,nullptr,0);
     }
-    const std::string &filename = input.getCmdOption("-size");
+    const string &filename = input.getCmdOption("-size");
     if (input.cmdOptionExists("-size")){
         numElements = stoul(filename,nullptr,0);
     }
-    const std::string &argthreads = input.getCmdOption("-threads");
+    const string &argthreads = input.getCmdOption("-threads");
     if (input.cmdOptionExists("-threads")){
         PROCESSORS = stoul(argthreads,nullptr,0);
     }

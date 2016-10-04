@@ -6,8 +6,7 @@
 
 using namespace std;
 
-long phase3 = 0;
-typedef chrono::microseconds time_u;
+atomic<long> phase3, phase4_t;
 
 inline void handleChunk(int idx, vec results){
     unique_lock<mutex> lk(p4[idx]);
@@ -25,10 +24,10 @@ void worker(const int id, promise<vec> prom, const int from, const int end){
     }
     prom.set_value(phase1Arr);
 
-    //PHASE 3
-    auto begin =  chrono::steady_clock::now();
+    //PHASE 3 partition and assign
     auto idx = 0;
     auto pivots = phase2Vector.get();
+    auto PHASE3START = chrono::steady_clock::now();
     auto pivot = pivots[idx];
     vec results;
     for(auto i = from; i < end; i++){
@@ -43,14 +42,15 @@ void worker(const int id, promise<vec> prom, const int from, const int end){
         results.push_back(k);
     }
     handleChunk(idx, results);
-
-    phase3 = chrono::duration_cast<time_u>(chrono::steady_clock::now() - begin).count();
+    phase3+=(chrono::duration_cast<time_u>(chrono::steady_clock::now() - PHASE3START).count());
 
     unique_lock<mutex> lk(p4[id]);
     p4CV[id].wait(lk, [id](){ return threadsDone[id] == PROCESSORS; });
 
     //PHASE 4 SORT
+    auto PHASE4START = chrono::steady_clock::now();
     merge_sort(phase4[id].begin(), phase4[id].end());
+    phase4_t+=(chrono::duration_cast<time_u>(chrono::steady_clock::now() - PHASE4START).count());
 }
 
 int main(int argc, char ** argv) {
@@ -76,7 +76,7 @@ int main(int argc, char ** argv) {
         auto subArrays = result.get();
         results.insert(results.end(), subArrays.begin(), subArrays.end());
     }
-    cout << chrono::duration_cast<time_u>(chrono::steady_clock::now() - begin).count() << " ";
+    cout << chrono::duration_cast<time_u>(chrono::steady_clock::now() - begin).count() << ",";
 
     auto PHASE2START = chrono::steady_clock::now();
     sort(results.begin(), results.end());
@@ -87,18 +87,19 @@ int main(int argc, char ** argv) {
         subResults.push_back(results[i]);
 
     phase2Promise.set_value(subResults);
-    cout << chrono::duration_cast<time_u>(chrono::steady_clock::now() - PHASE2START).count() << " ";
+    cout << chrono::duration_cast<time_u>(chrono::steady_clock::now() - PHASE2START).count() << ",";
 
-    auto PHASE3START = chrono::steady_clock::now();
     //END PHASE 4
     for(auto &it : threads) it.join();
     auto end = chrono::steady_clock::now();
-    cout << phase3/PROCESSORS << " ";
-    cout << chrono::duration_cast<time_u>(chrono::steady_clock::now() - PHASE3START).count() << " ";
+
+    cout << phase3/PROCESSORS << "," << phase4_t/PROCESSORS << "," ;
 
     //COMBINE RESULTS FROM PHASE 4
     for(auto &id : phase4)
         phase4Results.insert(phase4Results.end(), id.begin(), id.end());
+
+//    phase4Results.push_back(1);
 
     cout << chrono::duration_cast<time_u>(end - begin).count() <<endl;
 //    cout << numElements <<" "<< totalElements <<" "<< PROCESSORS <<" "<< seed;
