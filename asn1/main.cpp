@@ -76,7 +76,7 @@ int main(int argc, char ** argv) {
         auto subArrays = result.get();
         results.insert(results.end(), subArrays.begin(), subArrays.end());
     }
-    cout << chrono::duration_cast<time_u>(chrono::steady_clock::now() - begin).count() << "+";
+    cout << chrono::duration_cast<time_u>(chrono::steady_clock::now() - begin).count() << " ";
 
     auto PHASE2START = chrono::steady_clock::now();
     sort(results.begin(), results.end());
@@ -87,13 +87,13 @@ int main(int argc, char ** argv) {
         subResults.push_back(results[i]);
 
     phase2Promise.set_value(subResults);
-    cout << chrono::duration_cast<time_u>(chrono::steady_clock::now() - PHASE2START).count() << "+";
+    cout << chrono::duration_cast<time_u>(chrono::steady_clock::now() - PHASE2START).count() << " ";
 
     auto PHASE3START = chrono::steady_clock::now();
     //END PHASE 4
     for(auto &it : threads) it.join();
     auto end = chrono::steady_clock::now();
-    cout << phase3/PROCESSORS << "+";
+    cout << phase3/PROCESSORS << " ";
     cout << chrono::duration_cast<time_u>(chrono::steady_clock::now() - PHASE3START).count() << " ";
 
     //COMBINE RESULTS FROM PHASE 4
@@ -101,6 +101,6 @@ int main(int argc, char ** argv) {
         phase4Results.insert(phase4Results.end(), id.begin(), id.end());
 
     cout << chrono::duration_cast<time_u>(end - begin).count() <<endl;
-    cout << numElements <<" "<< totalElements <<" "<< PROCESSORS <<" "<< seed;
+//    cout << numElements <<" "<< totalElements <<" "<< PROCESSORS <<" "<< seed;
     return ((is_sorted(phase4Results.begin(), phase4Results.end()) == 1) ? 0 : 1);
 }

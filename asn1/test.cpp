@@ -14,6 +14,6 @@ int main(int argc, char ** argv){
     vec v = randomArray(numElements*PROCESSORS);
     merge_sort(v.begin(), v.end());
     auto end = chrono::steady_clock::now();
-    cout << chrono::duration_cast<chrono::milliseconds>(end - begin).count();
+    cout << chrono::duration_cast<chrono::milliseconds>(end - begin).count() << endl;
     return 0;
 }
