@@ -9,6 +9,7 @@
 #include "main.h"
 
 int main(int argc, char ** argv){
+    PROCESSORS = 1;
     init(argc, argv);
     auto begin = std::chrono::steady_clock::now();
     vec v = randomArray(numElements*PROCESSORS);

@@ -28,7 +28,7 @@ void worker(const int id, promise<vec> prom, const int from, const int end){
     auto idx = 0;
     auto pivots = phase2Vector.get();
     auto PHASE3START = chrono::steady_clock::now();
-    auto pivot = pivots[idx];
+    auto pivot = pivots.size() == 0 ? -1 : pivots[idx];
     vec results;
     for(auto i = from; i < end; i++){
         auto k = randomArr[i];

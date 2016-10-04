@@ -11,4 +11,5 @@ add_executable(asn1 ${SOURCE_FILES})
 set(SOURCE_FILES_TEST test.cpp)
 add_executable(asn1test ${SOURCE_FILES_TEST})
 
-add_custom_target(bench COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/benchmark.sh")
+add_custom_target(psrs COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/benchmark.sh" "psrs")
+add_custom_target(seq COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/benchmark.sh" "seq")

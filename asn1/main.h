@@ -22,7 +22,7 @@
 
 using namespace std;
 
-typedef long vecType;
+typedef unsigned long vecType;
 typedef vector<vecType> vec;
 typedef chrono::microseconds time_u;
 
@@ -33,7 +33,9 @@ inline void handleChunk(int idx, vec results);
 void init(int argc, char ** argv);
 
 // Global constants
-unsigned long numElements = 100000, seed = 42, PROCESSORS = thread::hardware_concurrency(), totalElements, sampleIntervals;
+unsigned long numElements, seed = 42,
+        PROCESSORS = thread::hardware_concurrency(),
+        totalElements = 100000, sampleIntervals;
 
 // Global shared variables
 // phase 2 globals
@@ -51,7 +53,7 @@ vec randomArr;
 vec randomArray(unsigned long size) {
     default_random_engine generator;
     generator.seed(seed);
-    uniform_int_distribution<vecType> dis(1, LONG_MAX);
+    uniform_int_distribution<vecType> dis(1, ULONG_MAX);
 
     vec v(size);
     for(auto i = 0; i < size; i++)
@@ -88,7 +90,7 @@ public:
         if (itr != this->tokens.end() && ++itr != this->tokens.end()){
             return *itr;
         }
-        return string();
+        return move(string());
     }
     /// @author iain
     bool cmdOptionExists(const string &option) const{
@@ -119,12 +121,15 @@ void init(int argc, char ** argv){
     }
     const string &filename = input.getCmdOption("-size");
     if (input.cmdOptionExists("-size")){
-        numElements = stoul(filename,nullptr,0);
+        totalElements = stoul(filename,nullptr,0);
+
     }
     const string &argthreads = input.getCmdOption("-threads");
     if (input.cmdOptionExists("-threads")){
         PROCESSORS = stoul(argthreads,nullptr,0);
     }
+
+    numElements = totalElements / PROCESSORS;
 
     phase4.resize(PROCESSORS);
     threadsDone.resize(PROCESSORS,0);
@@ -133,7 +138,6 @@ void init(int argc, char ** argv){
     vector<condition_variable> b(PROCESSORS);
     p4CV.swap(b);
 
-    totalElements = PROCESSORS*numElements;
     sampleIntervals = totalElements/(PROCESSORS*PROCESSORS);
 
     randomArr = randomArray(totalElements);
