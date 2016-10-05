@@ -1,9 +1,9 @@
 Command line arguments
 
 ```
--threads number of threads to use. default is the number of cores of the running machine.
+-threads number of threads to use. Default is the number of cores of the running machine.
 -seed the seed for generating the list. Default is 42
--size number of elements per thread. Default is 100000
+-size number of elements in the random array. Default is 100000
 
 ```
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-seq=$(seq 2000000 1000000 5000000)
+seq=$(seq 1000000 1000000 4000000)
 
 numProcessors=$(($(nproc)+2))
 echo ${seq}

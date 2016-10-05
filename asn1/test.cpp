@@ -9,11 +9,10 @@
 #include "main.h"
 
 int main(int argc, char ** argv){
-    PROCESSORS = 1;
     init(argc, argv);
     auto begin = std::chrono::steady_clock::now();
-    vec v = randomArray(numElements*PROCESSORS);
-    merge_sort(v.begin(), v.end());
+    vec v = randomArray(totalElements);
+    sort(v.begin(), v.end());
     auto end = chrono::steady_clock::now();
     cout << chrono::duration_cast<time_u>(end - begin).count() << endl;
     return 0;

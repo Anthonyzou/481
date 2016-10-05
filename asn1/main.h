@@ -45,7 +45,6 @@ promise<vec> phase2Promise; shared_future<vec> phase2Vector(phase2Promise.get_fu
 vector<vec> phase4;
 vector<mutex> p4;
 vector<condition_variable> p4CV;
-vector<int> threadsDone;
 
 // random array
 vec randomArr;
@@ -101,18 +100,6 @@ private:
     vector <string> tokens;
 };
 
-// https://stackoverflow.com/questions/6097927/is-there-a-way-to-implement-analog-of-pythons-separator-join-in-c
-template <typename Iter>
-string join(Iter begin, Iter end, string const& separator)
-{
-    ostringstream result;
-    if (begin != end)
-        result << *begin++;
-    while (begin != end)
-        result << separator << *begin++;
-    return result.str();
-}
-
 void init(int argc, char ** argv){
     InputParser input(argc, argv);
     const string & argseed = input.getCmdOption("-seed");
@@ -128,15 +115,11 @@ void init(int argc, char ** argv){
     if (input.cmdOptionExists("-threads")){
         PROCESSORS = stoul(argthreads,nullptr,0);
     }
-
     numElements = totalElements / PROCESSORS;
 
     phase4.resize(PROCESSORS);
-    threadsDone.resize(PROCESSORS,0);
-    vector<mutex> a(PROCESSORS);
-    p4.swap(a);
-    vector<condition_variable> b(PROCESSORS);
-    p4CV.swap(b);
+    vector<mutex> a(PROCESSORS);p4.swap(a);
+    vector<condition_variable> b(PROCESSORS);p4CV.swap(b);
 
     sampleIntervals = totalElements/(PROCESSORS*PROCESSORS);
 

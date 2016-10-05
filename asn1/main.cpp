@@ -2,6 +2,9 @@
 // 1248175
 // cmput 481
 // Oct 5, 2016
+
+// Created by azou on 28/09/16.
+
 #include "main.h"
 
 using namespace std;
@@ -10,9 +13,9 @@ atomic<long> phase3, phase4_t;
 
 inline void handleChunk(int idx, vec results){
     unique_lock<mutex> lk(p4[idx]);
+    auto size = phase4[idx].size();
     phase4[idx].insert(phase4[idx].end(), results.begin(), results.end());
-    threadsDone[idx]++;
-    p4CV[idx].notify_one();
+    inplace_merge(phase4[idx].begin(), phase4[idx].begin()+size, phase4[idx].end());
 }
 
 void worker(const int id, promise<vec> prom, const int from, const int end){
@@ -28,29 +31,31 @@ void worker(const int id, promise<vec> prom, const int from, const int end){
     auto idx = 0;
     auto pivots = phase2Vector.get();
     auto PHASE3START = chrono::steady_clock::now();
-    auto pivot = pivots.size() == 0 ? -1 : pivots[idx];
-    vec results;
-    for(auto i = from; i < end; i++){
-        auto k = randomArr[i];
-        if(pivot < k && pivots.size() > idx){
-            handleChunk(idx, results);
-            results.clear();
-            ++idx;
-            if(idx < pivots.size())
-                pivot = pivots[idx];
+    if(pivots.size() > 0){
+        auto pivot = pivots[idx];
+        vec results;
+        for(auto i = from; i < end; i++){
+            auto k = randomArr[i];
+            if(pivot < k && pivots.size() > idx){
+                handleChunk(idx, results);
+                results.clear();
+                ++idx;
+                if(idx < pivots.size())
+                    pivot = pivots[idx];
+            }
+            results.push_back(k);
         }
-        results.push_back(k);
+        handleChunk(idx, results);
     }
-    handleChunk(idx, results);
+    else{
+        vec results;
+        for(auto i = from; i < end; i++){
+            auto k = randomArr[i];
+            results.push_back(k);
+        }
+        handleChunk(idx, results);
+    }
     phase3+=(chrono::duration_cast<time_u>(chrono::steady_clock::now() - PHASE3START).count());
-
-    unique_lock<mutex> lk(p4[id]);
-    p4CV[id].wait(lk, [id](){ return threadsDone[id] == PROCESSORS; });
-
-    //PHASE 4 SORT
-    auto PHASE4START = chrono::steady_clock::now();
-    merge_sort(phase4[id].begin(), phase4[id].end());
-    phase4_t+=(chrono::duration_cast<time_u>(chrono::steady_clock::now() - PHASE4START).count());
 }
 
 int main(int argc, char ** argv) {
@@ -60,7 +65,7 @@ int main(int argc, char ** argv) {
     vector<future<vec>> phase1Results;
     vec results, subResults, phase4Results;
 
-//    cout << "NUM processors " << thread::hardware_concurrency() << endl << "totalElements " << totalElements << endl;
+//    cout << "NUM processors " << PROCESSORS << endl << "totalElements " << totalElements << endl;
 
     auto begin = chrono::steady_clock::now();
     //CREATE THREADS
@@ -93,15 +98,16 @@ int main(int argc, char ** argv) {
     for(auto &it : threads) it.join();
     auto end = chrono::steady_clock::now();
 
-    cout << phase3/PROCESSORS << "," << phase4_t/PROCESSORS << "," ;
+    cout << phase3/PROCESSORS << "," ;
+
+    auto PHASE4START = chrono::steady_clock::now();
 
     //COMBINE RESULTS FROM PHASE 4
     for(auto &id : phase4)
         phase4Results.insert(phase4Results.end(), id.begin(), id.end());
+    cout << chrono::duration_cast<time_u>(chrono::steady_clock::now() - PHASE4START).count() << ",";
 
-//    phase4Results.push_back(1);
 
     cout << chrono::duration_cast<time_u>(end - begin).count() <<endl;
-//    cout << numElements <<" "<< totalElements <<" "<< PROCESSORS <<" "<< seed;
     return ((is_sorted(phase4Results.begin(), phase4Results.end()) == 1) ? 0 : 1);
 }
