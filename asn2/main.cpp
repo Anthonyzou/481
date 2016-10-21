@@ -3,11 +3,11 @@
 #include <iostream>
 namespace mpi = boost::mpi;
 
-int main(int argc, char* argv[])
+int main(int argc, char ** argv)
 {
-  mpi::environment env(argc, argv);
-  mpi::communicator world;
-  std::cout << "I am process " << world.rank() << " of " << world.size()
-            << "." << std::endl;
-  return 0;
+    mpi::environment env(argc, argv);
+    mpi::communicator world;
+    std::cout << "I am process " << world.rank() << " of " << world.size()
+              << "." << std::endl;
+    return 0;
 }
