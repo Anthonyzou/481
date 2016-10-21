@@ -4,9 +4,6 @@ project(asn2)
 find_package(Boost COMPONENTS mpi REQUIRED)
 find_package(MPI REQUIRED)
 
-include_directories(${MPI_INCLUDE_PATH})
-include_directories( ${Boost_INCLUDE_DIR} )
-
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
