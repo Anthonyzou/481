@@ -108,6 +108,6 @@ int main(int argc, char ** argv) {
     cout << chrono::duration_cast<time_u>(chrono::steady_clock::now() - PHASE4START).count() << ",";
 
 
-    cout << chrono::duration_cast<time_u>(end - begin).count() <<endl;
+    cout << chrono::duration_cast<time_u>(end - begin).count() << endl;
     return ((is_sorted(phase4Results.begin(), phase4Results.end()) == 1) ? 0 : 1);
 }
