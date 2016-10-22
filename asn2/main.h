@@ -33,9 +33,7 @@ inline void handleChunk(int idx, vec results);
 void init(int argc, char ** argv);
 
 // Global constants
-unsigned long numElements, seed = 42,
-        PROCESSORS = thread::hardware_concurrency(),
-        totalElements = 100000, sampleIntervals;
+vecType numElements, seed = 42, totalElements = 100000;
 
 // random array
 vec randomArr;
@@ -50,6 +48,10 @@ vec randomArray(unsigned long size) {
     return v;
 }
 
+string qformat(string args){
+
+
+}
 // https://en.wikibooks.org/wiki/Algorithm_Implementation/Sorting/Merge_sort
 template <typename BidirIt, typename Compare = less<vecType>>
 void merge_sort(BidirIt first, BidirIt last, Compare cmp = Compare {}) {
@@ -100,9 +102,5 @@ void init(int argc, char ** argv){
     if (input.cmdOptionExists("-size")){
         totalElements = stoul(filename,nullptr,0);
 
-    }
-    const string &argthreads = input.getCmdOption("-threads");
-    if (input.cmdOptionExists("-threads")){
-        PROCESSORS = stoul(argthreads,nullptr,0);
     }
 }

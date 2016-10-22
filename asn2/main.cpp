@@ -28,34 +28,48 @@ int main(int argc, char* argv[])
     communicator world;
 
     vec mainArray;
-    int perProcess = 3;
-    totalElements = perProcess * world.size();
 
     if (world.rank() == 0) {
-        mainArray = randomArray(totalElements);
+        // mainArray = randomArray(totalElements);
+        mainArray = {
+            16,2,17,24,33,28,30,1,0,27,9,25,34,23,19,18,11,7,
+            21,13,8,35,12,29,6,3,4,14,22,15,32,10,26,31,20,5
+        };
     }
+
     broadcast(world, mainArray, 0);
 
-    auto begin = mainArray.begin()+world.rank()*perProcess;
-    auto end = begin+perProcess;
-    sort(begin, end);
+    int perProcess = 12;
+    totalElements = mainArray.size();
+    auto sampleIntervals = floor(totalElements/(world.size()*world.size()));
+
+    const auto begin = world.rank()*perProcess;
+    const auto end = begin+perProcess;
+
+    sort(mainArray.begin()+begin, mainArray.begin()+end);
+    vec phase1Results;
+    for(auto i = begin; i < end; i += sampleIntervals){
+        phase1Results.push_back(mainArray[i]);
+    }
+
+    cout << format("rank %1%: %2% %3%\n") % world.rank() % begin % end ;
 
     if (world.rank() == 0) {
+        cout << sampleIntervals << endl;
         vector<vec> all_numbers;
-        gather(world, mainArray, all_numbers, 0);
+        gather(world, phase1Results, all_numbers, 0);
         stringstream s;
-        for (int proc = 0; proc < world.size(); ++proc) {
-            for(auto &i : all_numbers[proc]){
-                s << i << endl;
+        for (auto &proc : all_numbers) {
+            for(auto &i : proc){
+                s << format("%1% ") %i;
             }
-            s << endl;
+            s << format(" size %1% \n") % proc.size();
         }
         cout << s.str();
     }
     else {
-        gather(world, mainArray, 0);
+        gather(world, phase1Results, 0);
     }
-
 
     return 0;
 }
