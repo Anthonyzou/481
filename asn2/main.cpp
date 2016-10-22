@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
             for(auto &i : proc){
                 s << format("%1% ") %i;
             }
-            s << format(" size %1% \n") % proc.size();
+            s << format(" size: %1% \n") % proc.size();
         }
         cout << s.str();
     }

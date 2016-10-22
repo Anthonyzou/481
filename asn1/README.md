@@ -1,3 +1,8 @@
+Anthony Ou
+12348175
+CMPUT 481
+Fall 2016
+
 Command line arguments
 
 ```
@@ -13,5 +18,4 @@ cd release
 ./build.sh
 ```
 
-Then run `make` to generate the PSRS binary and the serial sorting binary 
-
+Then run `make` to generate the PSRS binary and the serial sorting binary

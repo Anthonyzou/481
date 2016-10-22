@@ -48,10 +48,6 @@ vec randomArray(unsigned long size) {
     return v;
 }
 
-string qformat(string args){
-
-
-}
 // https://en.wikibooks.org/wiki/Algorithm_Implementation/Sorting/Merge_sort
 template <typename BidirIt, typename Compare = less<vecType>>
 void merge_sort(BidirIt first, BidirIt last, Compare cmp = Compare {}) {
