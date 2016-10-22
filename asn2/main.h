@@ -14,7 +14,6 @@
 #include <iostream>
 #include <thread>
 #include <random>
-#include <algorithm>
 #include <mutex>
 #include <future>
 #include <climits>
@@ -22,22 +21,23 @@
 
 using namespace std;
 
+// TYPEDEFS
 typedef unsigned long vecType;
 typedef vector<vecType> vec;
 typedef chrono::microseconds time_u;
 
-// function prototypes
-vec randomArray(unsigned long size);
-void worker(const int id, promise<vec> prom, const int from, const int end);
-inline void handleChunk(int idx, vec results);
-void init(int argc, char ** argv);
+// FUNCTION PROTOTYPES
+vec         randomArray(unsigned long size);
+void        worker(const int id, promise<vec> prom, const int from, const int end);
+void        init(int argc, char ** argv);
+template <typename t> inline
+void        sortedMerge(vector<t> * result, vector<t> * a);
 
-// Global constants
+// GLOBAL CONSTANTS
 vecType numElements, seed = 42, totalElements = 100000;
-
-// random array
 vec randomArr;
 
+// IMPLMENTATIONS
 vec randomArray(unsigned long size) {
     default_random_engine generator;
     generator.seed(seed);
@@ -46,6 +46,13 @@ vec randomArray(unsigned long size) {
     vec v(size);
     generate(v.begin(), v.end(), bind(dis, generator));
     return v;
+}
+
+template <typename t>
+inline void sortedMerge(vector<t> * result, vector<t> * a){
+    auto size = result->size();
+    result->insert(result->end(), a->begin(), a->end());
+    inplace_merge(result->begin(), result->begin()+size, result->end());
 }
 
 // https://en.wikibooks.org/wiki/Algorithm_Implementation/Sorting/Merge_sort
