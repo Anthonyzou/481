@@ -77,42 +77,37 @@ int main(int argc, char* argv[])
     // phase 3
     broadcast(world, pivots, 0);
 
-//    for(auto &pivot: pivots){
-//        s << pivot << " ";
-//    }
-//    cout << s.str() << endl; s.clear();
-
     auto idx = 0;
     vec results;
     if(pivots.size() > 0){
         auto pivot = pivots[idx];
         for(auto i = from; i < end; i++){
-
             auto k = mainArray[i];
             if(pivot < k && pivots.size() > idx){
-                gather(world, results, idx);
+                world.isend(idx,0,results);
                 results.clear();
                 ++idx;
                 if(idx < pivots.size())
                     pivot = pivots[idx];
-//                cout << world.rank() << ": " << s.str() << endl;
-                s.str("");
             }
-            s << k  << " ";
             results.push_back(k);
         }
-//        cout << world.rank() << ": " << s.str() << endl;
-        gather(world, results, idx);
+        world.send(idx,0,results);
     }
 
     s.str("");
-    vector<vec> a;
-//    gather(world, results, a, world.rank());
-    for(auto &i:a){
-        s << i << " ";
-//        for(auto &k:i )
-//            s << k << " ";
+    vec a;
+    int messages = 0;
+    while(messages < world.size()){
+        auto msg = world.probe(any_source, any_tag);
+        s << format("RANK %1% :: SOURCE %2% :: ")  % world.rank() % msg.source();
+        world.recv(msg.source(), msg.tag(), a);
+        for(auto &i :a ){
+            s << i << " ";
+        }
+        s << endl;
+        messages++;
     }
-    cout << a.size() << ": " << s.str();
+    cout << s.str();
     return 0;
 }
