@@ -16,8 +16,8 @@ using namespace mpi;
 using namespace boost;
 using namespace std;
 
-//    cout << boost::format("writing %1%,  x=%2% : %3%-th try\n") % "toto" % 40.23 % 50;
-// prints "writing toto,  x=40.230 : 50-th try"
+inline void handleChunk(int idx, vec results){
+}
 
 int main(int argc, char* argv[])
 {
@@ -43,33 +43,76 @@ int main(int argc, char* argv[])
     totalElements = mainArray.size();
     auto sampleIntervals = floor(totalElements/(world.size()*world.size()));
 
-    const auto begin = world.rank()*perProcess;
-    const auto end = begin+perProcess;
+    const auto from = world.rank()*perProcess;
+    const auto end = from+perProcess;
 
-    sort(mainArray.begin()+begin, mainArray.begin()+end);
+    // PHASE 1
+    sort(mainArray.begin()+from, mainArray.begin()+end);
     vec phase1Results;
-    for(auto i = begin; i < end; i += sampleIntervals){
+    for(auto i = from; i < end; i += sampleIntervals){
         phase1Results.push_back(mainArray[i]);
     }
 
-    cout << format("rank %1%: %2% %3%\n") % world.rank() % begin % end ;
-
+    vec pivots, temp;
+    stringstream s;
     if (world.rank() == 0) {
-        cout << sampleIntervals << endl;
+        // PHASE2
         vector<vec> all_numbers;
         gather(world, phase1Results, all_numbers, 0);
-        stringstream s;
         for (auto &proc : all_numbers) {
-            for(auto &i : proc){
-                s << format("%1% ") %i;
-            }
-            s << format(" size: %1% \n") % proc.size();
+            auto size = temp.size();
+            temp.insert(temp.end(), proc.begin(), proc.end());
+            inplace_merge(temp.begin(), temp.begin()+size, temp.end());
         }
-        cout << s.str();
+
+        for(auto i = world.size(), k = 0; k++ < world.size()-1; i += world.size())
+            pivots.push_back(temp[i]);
+
+        broadcast(world, pivots, 0);
     }
     else {
         gather(world, phase1Results, 0);
     }
 
+    // phase 3
+    broadcast(world, pivots, 0);
+
+//    for(auto &pivot: pivots){
+//        s << pivot << " ";
+//    }
+//    cout << s.str() << endl; s.clear();
+
+    auto idx = 0;
+    vec results;
+    if(pivots.size() > 0){
+        auto pivot = pivots[idx];
+        for(auto i = from; i < end; i++){
+
+            auto k = mainArray[i];
+            if(pivot < k && pivots.size() > idx){
+                gather(world, results, idx);
+                results.clear();
+                ++idx;
+                if(idx < pivots.size())
+                    pivot = pivots[idx];
+//                cout << world.rank() << ": " << s.str() << endl;
+                s.str("");
+            }
+            s << k  << " ";
+            results.push_back(k);
+        }
+//        cout << world.rank() << ": " << s.str() << endl;
+        gather(world, results, idx);
+    }
+
+    s.str("");
+    vector<vec> a;
+//    gather(world, results, a, world.rank());
+    for(auto &i:a){
+        s << i << " ";
+//        for(auto &k:i )
+//            s << k << " ";
+    }
+    cout << a.size() << ": " << s.str();
     return 0;
 }
