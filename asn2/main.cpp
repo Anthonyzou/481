@@ -6,7 +6,7 @@
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/format.hpp>
-
+#include <boost/algorithm/string/join.hpp>
 #include <stdlib.h>
 
 #include <list>
@@ -16,11 +16,14 @@ using namespace mpi;
 using namespace boost;
 using namespace std;
 
-inline void handleChunk(int idx, vec results){
+template <typename t>
+inline void sortedMerge(vector<t> * result, vector<t> * a){
+    auto size = result->size();
+    result->insert(result->end(), a->begin(), a->end());
+    inplace_merge(result->begin(), result->begin()+size, result->end());
 }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char ** argv) {
     auto start = chrono::steady_clock::now();
 
     init(argc, argv);
@@ -49,9 +52,8 @@ int main(int argc, char* argv[])
     // PHASE 1
     sort(mainArray.begin()+from, mainArray.begin()+end);
     vec phase1Results;
-    for(auto i = from; i < end; i += sampleIntervals){
+    for(auto i = from; i < end; i += sampleIntervals)
         phase1Results.push_back(mainArray[i]);
-    }
 
     vec pivots, temp;
     stringstream s;
@@ -59,11 +61,8 @@ int main(int argc, char* argv[])
         // PHASE2
         vector<vec> all_numbers;
         gather(world, phase1Results, all_numbers, 0);
-        for (auto &proc : all_numbers) {
-            auto size = temp.size();
-            temp.insert(temp.end(), proc.begin(), proc.end());
-            inplace_merge(temp.begin(), temp.begin()+size, temp.end());
-        }
+        for (auto &proc : all_numbers)
+            sortedMerge(&temp, &proc);
 
         for(auto i = world.size(), k = 0; k++ < world.size()-1; i += world.size())
             pivots.push_back(temp[i]);
@@ -78,36 +77,31 @@ int main(int argc, char* argv[])
     broadcast(world, pivots, 0);
 
     auto idx = 0;
-    vec results;
-    if(pivots.size() > 0){
-        auto pivot = pivots[idx];
-        for(auto i = from; i < end; i++){
-            auto k = mainArray[i];
-            if(pivot < k && pivots.size() > idx){
-                world.isend(idx,0,results);
-                results.clear();
-                ++idx;
-                if(idx < pivots.size())
-                    pivot = pivots[idx];
-            }
-            results.push_back(k);
-        }
-        world.send(idx,0,results);
+    vec::iterator a = mainArray.begin()+from;
+    for(auto &pivot : pivots){
+        auto b = partition(a, mainArray.begin()+end, [pivot](vecType em){ return em <= pivot; });
+        vec l(a, b);
+        (world.isend(idx++,0,l));
+        s.str("");
+        a = b;
     }
+    auto b = partition(a, mainArray.begin()+end, [](vecType em){ return true;});
+    vec l(a, b);
+    (world.isend(idx,0,l));
 
     s.str("");
-    vec a;
+    cout << endl;
+    vec  result;
     int messages = 0;
+    s << format("PHASE 4 :: RANK %1% :: SOURCE %2% :: ")  % world.rank() % 0;
     while(messages < world.size()){
-        auto msg = world.probe(any_source, any_tag);
-        s << format("RANK %1% :: SOURCE %2% :: ")  % world.rank() % msg.source();
+        auto msg = world.probe(messages++, 0);
+        vec a;
         world.recv(msg.source(), msg.tag(), a);
-        for(auto &i :a ){
-            s << i << " ";
-        }
-        s << endl;
-        messages++;
+        sortedMerge(&result, &a);
     }
+    std::copy(result.begin(), result.end(), std::ostream_iterator<int>(s, " "));
+    s << endl;
     cout << s.str();
     return 0;
 }

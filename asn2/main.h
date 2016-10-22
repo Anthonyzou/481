@@ -90,13 +90,12 @@ private:
 
 void init(int argc, char ** argv){
     InputParser input(argc, argv);
-    const string & argseed = input.getCmdOption("-seed");
-    if(input.cmdOptionExists("-seed")){
-        seed = stoul(argseed,nullptr,0);
-    }
-    const string &filename = input.getCmdOption("-size");
-    if (input.cmdOptionExists("-size")){
-        totalElements = stoul(filename,nullptr,0);
 
-    }
+    const string & argseed = input.getCmdOption("-seed");
+    if(input.cmdOptionExists("-seed"))
+        seed = stoul(argseed,nullptr,0);
+
+    const string &filename = input.getCmdOption("-size");
+    if (input.cmdOptionExists("-size"))
+        totalElements = stoul(filename,nullptr,0);
 }
