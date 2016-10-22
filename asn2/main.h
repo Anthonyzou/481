@@ -1,7 +1,7 @@
 // Anthony Ou
 // 1248175
 // cmput 481
-// Oct 5, 2016
+// nov 2016 - asn 2
 
 #pragma once
 
@@ -18,6 +18,8 @@
 #include <future>
 #include <climits>
 #include <sstream>
+#include <boost/mpi/communicator.hpp>
+#include <boost/format.hpp>
 
 using namespace std;
 
@@ -35,6 +37,7 @@ void        sortedMerge(vector<t> * result, vector<t> * a);
 
 // GLOBAL CONSTANTS
 vecType numElements, seed = 42, totalElements = 100000;
+int perProcess, sampleIntervals;
 vec randomArr;
 
 // IMPLMENTATIONS
@@ -46,6 +49,13 @@ vec randomArray(unsigned long size) {
     vec v(size);
     generate(v.begin(), v.end(), bind(dis, generator));
     return v;
+}
+
+template <typename t>
+void printArray(boost::mpi::communicator world, vector<t> a){
+    stringstream s;
+    std::copy(a.begin(), a.end(), std::ostream_iterator<int>(s, " "));
+    cout << boost::format("world %1% :: %2%\n") %world.rank()%s.str() ;
 }
 
 template <typename t>

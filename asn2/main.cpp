@@ -1,3 +1,8 @@
+// Anthony Ou
+// 1248175
+// cmput 481
+// nov 2016 - asn 2
+
 #include "main.h"
 
 #include <boost/mpi.hpp>
@@ -13,7 +18,7 @@ using namespace std;
 using namespace chrono;
 stringstream s;
 
-void phase1(const int from, const int end, const int sampleIntervals, vec * phase1Results){
+void phase1(const int from, const int end, vec * phase1Results){
     sort(randomArr.begin()+from, randomArr.begin()+end);
     for(auto i = from; i < end; i += sampleIntervals)
         phase1Results->push_back(randomArr[i]);
@@ -25,10 +30,11 @@ void phase2(const communicator world, vec * phase1Results, vec * pivots){
     if (world.rank() == 0) {
         // PHASE2
         gather(world, *phase1Results, all_samples, 0);
-        for (auto &proc : all_samples)
+        for (auto &proc : all_samples) {
             sortedMerge(&temp, &proc);
-
-        for(auto i = world.size(), k = 0; k++ < world.size()-1; i += world.size())
+        }
+        const int j = floor(world.size()/2);
+        for(auto i = world.size()+j-1, k = 0; k++ < world.size()-1; i += world.size()+j)
             pivots->push_back(temp[i]);
 
         // Broadcast begins phase 3
@@ -40,8 +46,10 @@ void phase2(const communicator world, vec * phase1Results, vec * pivots){
 
 void phase3(const int from, const int end, communicator world, vec * pivots, vec * result){
     vec temp;
+    // Recieve a broadcast of the pivots
     broadcast(world, *pivots, 0);
 
+    // Build partitions and send them to the other processes
     auto idx = 0;
     auto movingIt = randomArr.begin()+from;
     for(auto &pivot : *pivots){
@@ -51,6 +59,7 @@ void phase3(const int from, const int end, communicator world, vec * pivots, vec
     }
     world.isend(idx, 0, vec(movingIt, randomArr.begin()+end));
 
+    // recieve the partitions and send concat them.
     for(int messages = 0; messages < world.size(); messages++){
         auto msg = world.probe(messages, 0);
         world.recv(msg.source(), msg.tag(), temp);
@@ -74,29 +83,27 @@ int main(int argc, char ** argv) {
     environment env(argc, argv);
     communicator world;
 
-    if (world.rank() == 0) {
-        // randomArr = randomArray(totalElements);
-        randomArr = {
-            16,2,17,24,33,28,30,1,0,27,9,25,34,23,19,18,11,7,
-            21,13,8,35,12,29,6,3,4,14,22,15,32,10,26,31,20,5
-        };
-    }
+    if (world.rank() == 0)
+//        randomArr = randomArray(totalElements);
+        randomArr = {16,2,17,24,33,28,30,1,0,27,9,25,34,23,19,18,11,7, 21,13,8,35,12,29,6,3,4,14,22,15,32,10,26,31,20,5};
 
+    // Give the array to everyone
     broadcast(world, randomArr, 0);
 
-    totalElements = randomArr.size();
-    int perProcess = totalElements/world.size();
-    int sampleIntervals = floor(totalElements/(world.size()*world.size()));
+    // KEEP THIS BELOW THE BROADCAST
+    perProcess = randomArr.size()/world.size();
+    sampleIntervals = floor(randomArr.size()/(world.size()*world.size()));
 
-    const auto from = world.rank()*perProcess;
-    const auto end = from+perProcess;
+    const int from = world.rank()*perProcess;
+    int end = from+perProcess;
+    if(world.rank() == world.size()-1)
+        end = randomArr.size();
 
     auto start = std::chrono::steady_clock::now();
 
-
     // PHASE 1
     vec phase1Results;
-    phase1(from, end, sampleIntervals, &phase1Results);
+    phase1(from, end, &phase1Results);
 
     // PHASE 2
     vec pivots, temp;
@@ -112,11 +119,11 @@ int main(int argc, char ** argv) {
     if(world.rank() == 0){
 
         auto sorted = is_sorted(finalResults.begin(), finalResults.end());
-        cout << format("%1%\nsorted: %2%") %
-                duration_cast<time_u>(steady_clock::now() - start).count() % (sorted?"true":"false");
+        cout << format("%1%\nsorted: %2%\noriginalsize: %3%\nfinalsize: %4%\n") %
+                duration_cast<time_u>(steady_clock::now() - start).count() % (sorted?"true":"false") %
+                randomArr.size() % finalResults.size();
         return sorted ? 0 : 1;
     }
-    else{
+    else
         return 0;
-    }
 }
