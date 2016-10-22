@@ -3,11 +3,8 @@
 #include <boost/mpi.hpp>
 #include <iostream>
 #include <string>
-#include <boost/serialization/string.hpp>
-#include <boost/serialization/vector.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string/join.hpp>
-#include <stdlib.h>
 
 #include <list>
 
@@ -82,26 +79,33 @@ int main(int argc, char ** argv) {
         auto b = partition(a, mainArray.begin()+end, [pivot](vecType em){ return em <= pivot; });
         vec l(a, b);
         (world.isend(idx++,0,l));
-        s.str("");
         a = b;
     }
     auto b = partition(a, mainArray.begin()+end, [](vecType em){ return true;});
     vec l(a, b);
     (world.isend(idx,0,l));
 
-    s.str("");
-    cout << endl;
-    vec  result;
+    vec result;
     int messages = 0;
-    s << format("PHASE 4 :: RANK %1% :: SOURCE %2% :: ")  % world.rank() % 0;
     while(messages < world.size()){
         auto msg = world.probe(messages++, 0);
-        vec a;
-        world.recv(msg.source(), msg.tag(), a);
-        sortedMerge(&result, &a);
+        world.recv(msg.source(), msg.tag(), temp);
+        sortedMerge(&result, &temp);
     }
-    std::copy(result.begin(), result.end(), std::ostream_iterator<int>(s, " "));
-    s << endl;
-    cout << s.str();
+
+    if(world.rank() == 0){
+        vector<vec> all_numbers;
+        gather(world, result, all_numbers, 0);
+        vec finalResults;
+        for(auto &nums : all_numbers){
+            sortedMerge(&finalResults, &nums);
+        }
+        std::copy(finalResults.begin(), finalResults.end(), std::ostream_iterator<int>(s, " "));
+        cout  << s.str() << endl;
+    }
+    else{
+        gather(world, result, 0);
+    }
+
     return 0;
 }
