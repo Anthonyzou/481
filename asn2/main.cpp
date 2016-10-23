@@ -24,9 +24,9 @@ void phase2(const communicator world, vec * phase1Results, vec * pivots){
     if (world.rank() == 0) {
         // PHASE2
         gather(world, *phase1Results, all_samples, 0);
-        for (auto &proc : all_samples) {
+        for (auto &proc : all_samples)
             sortedMerge(&temp, &proc);
-        }
+
         for(auto i = world.size(), k = 0; k++ < world.size()-1; i += world.size())
             pivots->push_back(temp[i]);
 
@@ -81,7 +81,7 @@ int main(int argc, char ** argv) {
     communicator world;
 
     if (world.rank() == 0)
-        randomArr = randomArray(40000);
+        randomArr = randomArray(totalElements);
 //        randomArr = {16,2,17,24,33,28,30,1,0,27,9,25,34,23,19,18,11,7, 21,13,8,35,12,29,6,3,4,14,22,15,32,10,26,31,20,5};
 
     // Give the array to everyone

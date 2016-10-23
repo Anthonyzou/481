@@ -79,8 +79,8 @@ void merge_sort(BidirIt first, BidirIt last, Compare cmp = Compare {}) {
     if (n > 1) {
         const auto middle = next(first, n / 2);
 
-        merge_sort(first, middle, cmp);
         merge_sort(middle, last, cmp);
+        merge_sort(first, middle, cmp);
 
         inplace_merge(first, middle, last, cmp);
     }
