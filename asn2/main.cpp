@@ -113,11 +113,12 @@ int main(int argc, char ** argv) {
     // PHASE 4
     phase4(world, &result, &finalResults);
 
+    auto endTime = steady_clock::now() ;
     if(world.rank() == 0){
 
         auto sorted = is_sorted(finalResults.begin(), finalResults.end());
         cout << format("%1%\nsorted: %2%\noriginalsize: %3%\nfinalsize: %4%\n") %
-                duration_cast<time_u>(steady_clock::now() - start).count() % (sorted?"true":"false") %
+                duration_cast<time_u>(endTime - start).count()% (sorted?"true":"false") %
                 randomArr.size() % finalResults.size();
         return sorted ? 0 : 1;
     }
