@@ -5,12 +5,6 @@
 
 #include "main.h"
 
-#include <boost/mpi.hpp>
-#include <boost/format.hpp>
-#include <boost/algorithm/string/join.hpp>
-
-#include <list>
-
 namespace mpi = boost::mpi;
 using namespace mpi;
 using namespace boost;
@@ -33,8 +27,7 @@ void phase2(const communicator world, vec * phase1Results, vec * pivots){
         for (auto &proc : all_samples) {
             sortedMerge(&temp, &proc);
         }
-        const int j = floor(world.size()/2);
-        for(auto i = world.size()+j-1, k = 0; k++ < world.size()-1; i += world.size()+j)
+        for(auto i = world.size(), k = 0; k++ < world.size()-1; i += world.size())
             pivots->push_back(temp[i]);
 
         // Broadcast begins phase 3
@@ -52,19 +45,23 @@ void phase3(const int from, const int end, communicator world, vec * pivots, vec
     // Build partitions and send them to the other processes
     auto idx = 0;
     auto movingIt = randomArr.begin()+from;
+    auto endPoint = randomArr.begin()+end;
+    vector<request> requests;
     for(auto &pivot : *pivots){
-        auto nextPoint = partition(movingIt, randomArr.begin()+end, [pivot](vecType em){ return em <= pivot; });
-        world.isend(idx++, 0, vec(movingIt, nextPoint));
+        auto nextPoint = partition(movingIt, endPoint, [pivot](vecType em){ return em <= pivot; });
+        requests.push_back(world.isend(idx, idx, vec(movingIt, nextPoint)));
         movingIt = nextPoint;
+        idx++;
     }
-    world.isend(idx, 0, vec(movingIt, randomArr.begin()+end));
+    requests.push_back(world.isend(idx, idx, vec(movingIt, endPoint)));
 
     // recieve the partitions and send concat them.
     for(int messages = 0; messages < world.size(); messages++){
-        auto msg = world.probe(messages, 0);
-        world.recv(msg.source(), msg.tag(), temp);
+        world.recv(messages, world.rank(), temp);
         sortedMerge(result, &temp);
     }
+    wait_all(requests.begin(),requests.end());
+
 }
 
 void phase4(communicator world, vec * result, vec * finalResults){
@@ -84,8 +81,8 @@ int main(int argc, char ** argv) {
     communicator world;
 
     if (world.rank() == 0)
-//        randomArr = randomArray(totalElements);
-        randomArr = {16,2,17,24,33,28,30,1,0,27,9,25,34,23,19,18,11,7, 21,13,8,35,12,29,6,3,4,14,22,15,32,10,26,31,20,5};
+        randomArr = randomArray(40000);
+//        randomArr = {16,2,17,24,33,28,30,1,0,27,9,25,34,23,19,18,11,7, 21,13,8,35,12,29,6,3,4,14,22,15,32,10,26,31,20,5};
 
     // Give the array to everyone
     broadcast(world, randomArr, 0);
