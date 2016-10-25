@@ -38,7 +38,7 @@ void phase2(const communicator world, vec * phase1Results, vec * pivots){
 }
 
 void phase3(const int from, const int end, communicator world, vec * pivots, vec * result){
-    vec temp;
+    vector<vec> temp(world.size());
     // Recieve a broadcast of the pivots
     broadcast(world, *pivots, 0);
 
@@ -50,18 +50,17 @@ void phase3(const int from, const int end, communicator world, vec * pivots, vec
     for(auto &pivot : *pivots){
         auto nextPoint = partition(movingIt, endPoint, [pivot](vecType em){ return em <= pivot; });
         requests.push_back(world.isend(idx, idx, vec(movingIt, nextPoint)));
+        requests.push_back(world.irecv(idx, world.rank(), temp[idx]));
         movingIt = nextPoint;
         idx++;
     }
     requests.push_back(world.isend(idx, idx, vec(movingIt, endPoint)));
+    requests.push_back(world.irecv(idx, world.rank(), temp[idx]));
 
-    // recieve the partitions and send concat them.
-    for(int messages = 0; messages < world.size(); messages++){
-        world.recv(messages, world.rank(), temp);
-        sortedMerge(result, &temp);
-    }
     wait_all(requests.begin(),requests.end());
-
+    // recieve the partitions and send concat them.
+    for(auto &t:temp)
+        sortedMerge(result, &t);
 }
 
 void phase4(communicator world, vec * result, vec * finalResults){
@@ -115,12 +114,10 @@ int main(int argc, char ** argv) {
 
     auto endTime = steady_clock::now() ;
     if(world.rank() == 0){
-
         auto sorted = is_sorted(finalResults.begin(), finalResults.end());
-        cout << format("%1%\nsorted: %2%\noriginalsize: %3%\nfinalsize: %4%\n") %
-                duration_cast<time_u>(endTime - start).count()% (sorted?"true":"false") %
-                randomArr.size() % finalResults.size();
-        return sorted ? 0 : 1;
+        cout << duration_cast<time_u>(endTime - start).count()<< endl;
+//        cout << format("sorted: %1%\noriginalsize: %2%\nfinalsize: %3%\n")% (sorted?"true":"false") % randomArr.size() % finalResults.size();
+        return (sorted && randomArr.size() == finalResults.size()) ^ 1;
     }
     else
         return 0;
