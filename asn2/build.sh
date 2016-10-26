@@ -2,7 +2,7 @@
 
 
 PATH=$(pwd)/mpich-3.2/build/bin:$PATH
-LD_LIBRARY_PATH=$(pwd)/mpich-3.2/build/include:$LD_LIBRARY_PATH
+LD_LIBRARY_PATH=$(pwd)/mpich-3.2/build/lib:$LD_LIBRARY_PATH
 # cd boost
 # ./bootstrap.sh
 # git checkout project-config.jam
