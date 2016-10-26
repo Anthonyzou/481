@@ -34,7 +34,6 @@ typedef chrono::microseconds time_u;
 
 // FUNCTION PROTOTYPES
 vec         randomArray(unsigned long size);
-void        worker(const int id, promise<vec> prom, const int from, const int end);
 void        init(int argc, char ** argv);
 template <typename t> inline
 void        sortedMerge(vector<t> * result, vector<t> * a);
