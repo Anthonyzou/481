@@ -14,8 +14,6 @@
 #include <iostream>
 #include <thread>
 #include <random>
-#include <mutex>
-#include <future>
 #include <climits>
 #include <sstream>
 #include <vector>
