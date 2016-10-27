@@ -18,9 +18,9 @@ boost(){
 }
 
 build(){
-  pushd build
-    make
-  popd
+  cd build
+  make
+  cd ..
 }
 
 make(){

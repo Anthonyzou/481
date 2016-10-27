@@ -3,7 +3,7 @@ project(asn2)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/release")
 
-# set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_STATIC_LIBS ON)
 
 find_package(MPI)
 find_package(Boost COMPONENTS serialization mpi)
