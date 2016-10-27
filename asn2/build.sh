@@ -12,8 +12,8 @@ boost(){
   pushd boost_1_60_0
     ./bootstrap.sh
     git checkout project-config.jam
-    ./b2 --with-mpi --with-serialization link=static -j 4
-    ./b2 link=static install --prefix=${pwd}/build -j 4
+    ./b2 --with-mpi --with-serialization -j 8
+    ./b2 install --prefix=${pwd}/build -j 8
   popd
 }
 

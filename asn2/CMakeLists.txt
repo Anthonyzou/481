@@ -9,7 +9,10 @@ find_package(MPI)
 find_package(Boost COMPONENTS serialization mpi)
 
 if(NOT Boost_FOUND)
-  set(BOOST_ROOT "/local/scratch/asn2/boost")
+  set(Boost_LIBRARY_DIR "/local/scrach/481/asn2/boost/build/lib")
+  set(Boost_INCLUDE_DIR "/local/scrach/481/asn2/boost/build/include")
+  set(BOOST_ROOT "/local/scrach/481/asn2/boost/build")
+  set(Boost_NO_SYSTEM_PATHS ON)
   find_package(Boost COMPONENTS serialization mpi)
 endif()
 
