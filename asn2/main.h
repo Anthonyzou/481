@@ -18,12 +18,8 @@
 #include <sstream>
 #include <vector>
 
-#include <boost/mpi/communicator.hpp>
+#include "mpi/mpi.hpp"
 #include <boost/format.hpp>
-#include <boost/mpi.hpp>
-#include <boost/format.hpp>
-#include <boost/algorithm/string/join.hpp>
-#include <boost/serialization/vector.hpp>
 
 using namespace std;
 

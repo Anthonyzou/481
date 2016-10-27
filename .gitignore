@@ -3,3 +3,4 @@ vgcore*
 *.tar.gz
 *.pdf
 openmpi*
+release/asn2
