@@ -18,7 +18,7 @@
 #include <sstream>
 #include <vector>
 
-#include "mpi/mpi.hpp"
+#include <boost/mpi.hpp>
 #include <boost/format.hpp>
 
 using namespace std;

@@ -17,6 +17,12 @@ boost(){
   popd
 }
 
+build(){
+  pushd build
+    make
+  popd
+}
+
 make(){
   cmake -DCMAKE_BUILD_TYPE=Release -B./build -H.
 }
