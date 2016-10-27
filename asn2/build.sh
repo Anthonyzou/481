@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 mpich(){
   pushd mpich-3.2
     ./mpich-3.2/configure --disable-fortran --prefix=$(pwd)/build

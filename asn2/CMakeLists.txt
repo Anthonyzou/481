@@ -5,8 +5,14 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/release")
 
 # set(Boost_USE_STATIC_LIBS ON)
 
-find_package(MPI REQUIRED)
-find_package(Boost COMPONENTS serialization REQUIRED)
+find_package(MPI)
+find_package(Boost COMPONENTS serialization)
+
+if(NOT Boost_FOUND)
+  set(BOOST_ROOT "/usr/local/stow/boost_1_60_0/boost_1_60_0/")
+  find_package(Boost COMPONENTS serialization)
+  include_directories("/usr/lib/openmpi/include/")
+endif()
 
 message("BOOST " ${Boost_LIBRARIES})
 message("MPI " ${MPI_CXX_LIBRARIES})

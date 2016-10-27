@@ -11,17 +11,17 @@
 namespace boost { namespace mpi {
 
 exception::exception(const char* routine, int result_code)
-: routine_(routine), result_code_(result_code)
+  : routine_(routine), result_code_(result_code)
 {
-// Query the MPI implementation for its reason for failure
-char buffer[MPI_MAX_ERROR_STRING];
-int len;
-MPI_Error_string(result_code, buffer, &len);
+  // Query the MPI implementation for its reason for failure
+  char buffer[MPI_MAX_ERROR_STRING];
+  int len;
+  MPI_Error_string(result_code, buffer, &len);
 
-// Construct the complete error message
-message.append(routine_);
-message.append(": ");
-message.append(buffer, len);
+  // Construct the complete error message
+  message.append(routine_);
+  message.append(": ");
+  message.append(buffer, len);
 }
 
 exception::~exception() throw() { }
