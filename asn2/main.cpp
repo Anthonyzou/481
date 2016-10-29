@@ -11,30 +11,30 @@ using namespace boost;
 using namespace std;
 using namespace chrono;
 
-
-void phase1(const int from, const int end, vec &phase1Results) {
+void phase1(const int from, const int end, communicator world, vector<vec> &phase1Results) {
+    vec phase1;
     sort(randomArr.begin() + from, randomArr.begin() + end);
     for (auto i = from; i < end; i += sampleIntervals)
-        phase1Results.push_back(randomArr[i]);
+        phase1.push_back(randomArr[i]);
+
+    if (world.rank() == 0)
+        gather(world, phase1, phase1Results, 0);
+    else
+        gather(world, phase1Results, 0);
 }
 
-void phase2(const communicator world, vec &phase1Results, vec &pivots) {
+void phase2(const communicator world, vector<vec> &phase1Results, vec &pivots) {
+    if(world.rank() != 0) return;
     vec temp;
-    vector<vec> all_samples;
+    // PHASE2
+    for (auto &proc : phase1Results)
+        sortedMerge(&temp, &proc);
 
-    if (world.rank() == 0) {
-        // PHASE2
-        gather(world, phase1Results, all_samples, 0);
-        for (auto &proc : all_samples)
-            sortedMerge(&temp, &proc);
+    for (auto i = world.size(), k = 0; k++ < world.size() - 1; i += world.size())
+        pivots.push_back(temp[i]);
 
-        for (auto i = world.size(), k = 0; k++ < world.size() - 1; i += world.size())
-            pivots.push_back(temp[i]);
-
-        // Broadcast begins phase 3
-        broadcast(world, pivots, 0);
-    } else
-        gather(world, phase1Results, 0);
+    // Broadcast begins phase 3
+    broadcast(world, pivots, 0);
 }
 
 void phase3(const int from, const int end, communicator world, vec &pivots, vec &result) {
@@ -53,6 +53,7 @@ void phase3(const int from, const int end, communicator world, vec &pivots, vec 
         movingIt = nextPoint;
         idx++;
     }
+
     requests.push_back(world.isend(idx, idx, vec(movingIt, endPoint)));
 
     // recieve the partitions and then concat them.
@@ -73,7 +74,6 @@ void phase4(communicator world, vec &result, vec &finalResults) {
 }
 
 int main(int argc, char **argv) {
-
     init(argc, argv);
     environment env(argc, argv, true);
     communicator world;
@@ -93,22 +93,31 @@ int main(int argc, char **argv) {
     // last process gets the rest of the elements
     const int end = world.rank() == world.size() - 1 ? randomArr.size() : from + perProcess;
 
-    auto start = std::chrono::steady_clock::now();
+    auto start = steady_clock::now();
+    std::chrono::steady_clock::time_point timer;
 
     // PHASE 1
-    vec phase1Results;
-    phase1(from, end, phase1Results);
+    vector<vec> phase1Results;
+    if(world.rank() == 0) timer = steady_clock::now();
+    phase1(from, end, world, phase1Results);
+    if(world.rank() == 0) cout << duration_cast<time_u>(chrono::steady_clock::now() - timer).count() << ",";
 
     // PHASE 2
     vec pivots, temp;
+    if(world.rank() == 0) timer = steady_clock::now();
     phase2(world, phase1Results, pivots);
+    if(world.rank() == 0) cout << duration_cast<time_u>(chrono::steady_clock::now() - timer).count() << ",";
 
     // PHASE 3
     vec result, finalResults;
+    if(world.rank() == 0) timer = steady_clock::now();
     phase3(from, end, world, pivots, result);
+    if(world.rank() == 0) cout << duration_cast<time_u>(chrono::steady_clock::now() - timer).count() << ",";
 
     // PHASE 4
+    if(world.rank() == 0) timer = steady_clock::now();
     phase4(world, result, finalResults);
+    if(world.rank() == 0) cout << duration_cast<time_u>(chrono::steady_clock::now() - timer).count() << ",";
 
     auto endTime = steady_clock::now();
     if (world.rank() == 0) {
