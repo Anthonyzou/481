@@ -19,14 +19,21 @@ boost(){
 
 upload(){
   while read p; do
-    rsync -r release asn2/release
+    echo $p
+    rsync -aP ~/ ${p}:~/
   done < hostfile
 }
 
+run(){
+  mpirun -npernode 4 release/asn2 -size 10000
+}
+
 build(){
-  cd build
-  make
-  cd ..
+  make -C build all
+}
+
+hostfile(){
+  node scaleway.js > hostfile
 }
 
 make(){
