@@ -3,3 +3,4 @@ build
 release
 boost*
 mpich*
+node_modules

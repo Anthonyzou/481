@@ -17,6 +17,12 @@ boost(){
   popd
 }
 
+upload(){
+  while read p; do
+    rsync -r release asn2/release
+  done < hostfile
+}
+
 build(){
   cd build
   make
