@@ -37,7 +37,7 @@ void phase2(const communicator world, vector<vec> &phase1Results, vec &pivots) {
     broadcast(world, pivots, 0);
 }
 
-void phase3(const int from, const int end, communicator world, vec &pivots, vec &result) {
+void phase3(const int from, const int end, const communicator world, vec &pivots, vec &result) {
     vec temp;
     // Recieve a broadcast of the pivots
     broadcast(world, pivots, 0);
@@ -64,7 +64,7 @@ void phase3(const int from, const int end, communicator world, vec &pivots, vec 
     wait_all(requests.begin(), requests.end());
 }
 
-void phase4(communicator world, vec &result, vec &finalResults) {
+void phase4(const communicator world, const vec &result, vec &finalResults) {
     if (world.rank() == 0) {
         vector<vec> all_numbers;
         gather(world, result, all_numbers, 0);

@@ -20,7 +20,7 @@ inline void handleChunk(int idx, vec results){
 
 void worker(const int id, promise<vec> prom, const int from, const int end){
     //PHASE 1
-    sort(&randomArr[from], &randomArr[end]);
+    sort(randomArr.begin(), randomArr.end());
     vec phase1Arr;
     for(auto i = from; i < end; i += sampleIntervals){
         phase1Arr.push_back(randomArr[i]);
@@ -28,34 +28,21 @@ void worker(const int id, promise<vec> prom, const int from, const int end){
     prom.set_value(phase1Arr);
 
     //PHASE 3 partition and assign
+
     auto idx = 0;
     auto pivots = phase2Vector.get();
     auto PHASE3START = chrono::steady_clock::now();
-    if(pivots.size() > 0){
-        auto pivot = pivots[idx];
-        vec results;
-        for(auto i = from; i < end; i++){
-            auto k = randomArr[i];
-            if(pivot < k && pivots.size() > idx){
-                handleChunk(idx, results);
-                results.clear();
-                ++idx;
-                if(idx < pivots.size())
-                    pivot = pivots[idx];
-            }
-            results.push_back(k);
-        }
-        handleChunk(idx, results);
+    auto movingIt = randomArr.begin() + from;
+    auto endPoint = randomArr.begin() + end;
+    for (auto &pivot : pivots) {
+        auto nextPoint = partition(movingIt, endPoint, [pivot](vecType em) { return em <= pivot; });
+        handleChunk(idx, vec(movingIt, nextPoint));
+        movingIt = nextPoint;
+        idx++;
     }
-    else{
-        vec results;
-        for(auto i = from; i < end; i++){
-            auto k = randomArr[i];
-            results.push_back(k);
-        }
-        handleChunk(idx, results);
-    }
-    phase3+=(chrono::duration_cast<time_u>(chrono::steady_clock::now() - PHASE3START).count());
+    handleChunk(idx, vec(movingIt, endPoint));
+
+    phase3 += chrono::duration_cast<time_u>(chrono::steady_clock::now() - PHASE3START).count();
 }
 
 int main(int argc, char ** argv) {

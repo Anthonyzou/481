@@ -55,8 +55,7 @@ vec randomArray(unsigned long size) {
     uniform_int_distribution<vecType> dis(1, ULONG_MAX);
 
     vec v(size);
-    for(auto i = 0; i < size; i++)
-        v[i] = dis(generator);
+    generate(v.begin(), v.end(), bind(dis, generator));
     return v;
 }
 

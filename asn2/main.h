@@ -32,7 +32,7 @@ typedef chrono::microseconds time_u;
 vec         randomArray(unsigned long size);
 void        init(int argc, char ** argv);
 template <typename t> inline
-void        sortedMerge(vector<t> * result, vector<t> * a);
+void        sortedMerge(vector<t> &, vector<t> &);
 
 // GLOBAL CONSTANTS
 vecType numElements, seed = 42, totalElements = 100000;
@@ -55,21 +55,6 @@ inline void sortedMerge(vector<t> &toArray, vector<t>& fromArray){
     auto size = toArray.size();
     toArray.insert(toArray.end(), fromArray.begin(), fromArray.end());
     inplace_merge(toArray.begin(), toArray.begin()+size, toArray.end());
-}
-
-// https://en.wikibooks.org/wiki/Algorithm_Implementation/Sorting/Merge_sort
-template <typename BidirIt, typename Compare = less<vecType>>
-void merge_sort(BidirIt first, BidirIt last, Compare cmp = Compare {}) {
-    const auto n = distance(first, last);
-
-    if (n > 1) {
-        const auto middle = next(first, n / 2);
-
-        merge_sort(middle, last, cmp);
-        merge_sort(first, middle, cmp);
-
-        inplace_merge(first, middle, last, cmp);
-    }
 }
 
 // https://stackoverflow.com/questions/865668/how-to-parse-command-line-arguments-in-c
