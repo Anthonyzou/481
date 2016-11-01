@@ -4,3 +4,4 @@ release
 boost*
 mpich*
 node_modules
+release/asn2

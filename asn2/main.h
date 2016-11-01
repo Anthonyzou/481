@@ -51,17 +51,10 @@ vec randomArray(unsigned long size) {
 }
 
 template <typename t>
-void printArray(boost::mpi::communicator world, vector<t> a){
-    stringstream s;
-    std::copy(a.begin(), a.end(), std::ostream_iterator<int>(s, " "));
-    cout << boost::format("world %1% :: %2%\n") %world.rank()%s.str() ;
-}
-
-template <typename t>
-inline void sortedMerge(vector<t> * result, vector<t> * a){
-    auto size = result->size();
-    result->insert(result->end(), a->begin(), a->end());
-    inplace_merge(result->begin(), result->begin()+size, result->end());
+inline void sortedMerge(vector<t> &toArray, vector<t>& fromArray){
+    auto size = toArray.size();
+    toArray.insert(toArray.end(), fromArray.begin(), fromArray.end());
+    inplace_merge(toArray.begin(), toArray.begin()+size, toArray.end());
 }
 
 // https://en.wikibooks.org/wiki/Algorithm_Implementation/Sorting/Merge_sort

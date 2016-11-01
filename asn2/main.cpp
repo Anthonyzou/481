@@ -28,7 +28,7 @@ void phase2(const communicator world, vector<vec> &phase1Results, vec &pivots) {
     vec temp;
     // PHASE2
     for (auto &proc : phase1Results)
-        sortedMerge(&temp, &proc);
+        sortedMerge(temp, proc);
 
     for (auto i = world.size(), k = 0; k++ < world.size() - 1; i += world.size())
         pivots.push_back(temp[i]);
@@ -59,7 +59,7 @@ void phase3(const int from, const int end, communicator world, vec &pivots, vec 
     // recieve the partitions and then concat them.
     for (auto messages = 0; messages < world.size(); messages++) {
         world.recv(any_source, world.rank(), temp);
-        sortedMerge(&result, &temp);
+        sortedMerge(result, temp);
     }
     wait_all(requests.begin(), requests.end());
 }
@@ -68,7 +68,7 @@ void phase4(communicator world, vec &result, vec &finalResults) {
     if (world.rank() == 0) {
         vector<vec> all_numbers;
         gather(world, result, all_numbers, 0);
-        for (auto &nums : all_numbers) sortedMerge(&finalResults, &nums);
+        for (auto &nums : all_numbers) sortedMerge(finalResults, nums);
     } else
         gather(world, result, 0);
 }
