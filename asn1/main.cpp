@@ -11,18 +11,18 @@ using namespace std;
 
 atomic<long> phase3, phase4_t;
 
-inline void handleChunk(int idx, vec results){
+inline void handleChunk(int idx, vec results) {
     unique_lock<mutex> lk(p4[idx]);
     auto size = phase4[idx].size();
     phase4[idx].insert(phase4[idx].end(), results.begin(), results.end());
-    inplace_merge(phase4[idx].begin(), phase4[idx].begin()+size, phase4[idx].end());
+    inplace_merge(phase4[idx].begin(), phase4[idx].begin() + size, phase4[idx].end());
 }
 
-void worker(const int id, promise<vec> prom, const int from, const int end){
+void worker(const int id, promise<vec> prom, const int from, const int end) {
     //PHASE 1
     sort(randomArr.begin(), randomArr.end());
     vec phase1Arr;
-    for(auto i = from; i < end; i += sampleIntervals){
+    for (auto i = from; i < end; i += sampleIntervals) {
         phase1Arr.push_back(randomArr[i]);
     }
     prom.set_value(phase1Arr);
@@ -45,7 +45,7 @@ void worker(const int id, promise<vec> prom, const int from, const int end){
     phase3 += chrono::duration_cast<time_u>(chrono::steady_clock::now() - PHASE3START).count();
 }
 
-int main(int argc, char ** argv) {
+int main(int argc, char **argv) {
     init(argc, argv);
 
     vector<thread> threads;
@@ -56,7 +56,7 @@ int main(int argc, char ** argv) {
 
     auto begin = chrono::steady_clock::now();
     //CREATE THREADS
-    for(int i = 0; i < PROCESSORS; i++) {
+    for (int i = 0; i < PROCESSORS; i++) {
         promise<vec> phase1Prom;
         auto f = phase1Prom.get_future();
         phase1Results.push_back(move(f));
@@ -64,7 +64,7 @@ int main(int argc, char ** argv) {
     }
 
     //PHASE 2
-    for(auto &result: phase1Results){
+    for (auto &result: phase1Results) {
         auto subArrays = result.get();
         results.insert(results.end(), subArrays.begin(), subArrays.end());
     }
@@ -75,22 +75,22 @@ int main(int argc, char ** argv) {
 
     //PHASE 2 GET PIVOT POINTS
     auto k = 0;
-    for(auto i = PROCESSORS; k++ < PROCESSORS-1; i += PROCESSORS)
+    for (auto i = PROCESSORS; k++ < PROCESSORS - 1; i += PROCESSORS)
         subResults.push_back(results[i]);
 
     phase2Promise.set_value(subResults);
     cout << chrono::duration_cast<time_u>(chrono::steady_clock::now() - PHASE2START).count() << ",";
 
     //END PHASE 4
-    for(auto &it : threads) it.join();
+    for (auto &it : threads) it.join();
     auto end = chrono::steady_clock::now();
 
-    cout << phase3/PROCESSORS << "," ;
+    cout << phase3 / PROCESSORS << ",";
 
     auto PHASE4START = chrono::steady_clock::now();
 
     //COMBINE RESULTS FROM PHASE 4
-    for(auto &id : phase4)
+    for (auto &id : phase4)
         phase4Results.insert(phase4Results.end(), id.begin(), id.end());
     cout << chrono::duration_cast<time_u>(chrono::steady_clock::now() - PHASE4START).count() << ",";
 

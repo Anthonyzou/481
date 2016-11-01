@@ -24,7 +24,7 @@ void phase1(const int from, const int end, communicator world, vector<vec> &phas
 }
 
 void phase2(const communicator world, vector<vec> &phase1Results, vec &pivots) {
-    if(world.rank() != 0) return;
+    if (world.rank() != 0) return;
     vec temp;
     // PHASE2
     for (auto &proc : phase1Results)
@@ -98,26 +98,26 @@ int main(int argc, char **argv) {
 
     // PHASE 1
     vector<vec> phase1Results;
-    if(world.rank() == 0) timer = steady_clock::now();
+    if (world.rank() == 0) timer = steady_clock::now();
     phase1(from, end, world, phase1Results);
-    if(world.rank() == 0) cout << duration_cast<time_u>(chrono::steady_clock::now() - timer).count() << ",";
+    if (world.rank() == 0) cout << duration_cast<time_u>(chrono::steady_clock::now() - timer).count() << ",";
 
     // PHASE 2
     vec pivots, temp;
-    if(world.rank() == 0) timer = steady_clock::now();
+    if (world.rank() == 0) timer = steady_clock::now();
     phase2(world, phase1Results, pivots);
-    if(world.rank() == 0) cout << duration_cast<time_u>(chrono::steady_clock::now() - timer).count() << ",";
+    if (world.rank() == 0) cout << duration_cast<time_u>(chrono::steady_clock::now() - timer).count() << ",";
 
     // PHASE 3
     vec result, finalResults;
-    if(world.rank() == 0) timer = steady_clock::now();
+    if (world.rank() == 0) timer = steady_clock::now();
     phase3(from, end, world, pivots, result);
-    if(world.rank() == 0) cout << duration_cast<time_u>(chrono::steady_clock::now() - timer).count() << ",";
+    if (world.rank() == 0) cout << duration_cast<time_u>(chrono::steady_clock::now() - timer).count() << ",";
 
     // PHASE 4
-    if(world.rank() == 0) timer = steady_clock::now();
+    if (world.rank() == 0) timer = steady_clock::now();
     phase4(world, result, finalResults);
-    if(world.rank() == 0) cout << duration_cast<time_u>(chrono::steady_clock::now() - timer).count() << ",";
+    if (world.rank() == 0) cout << duration_cast<time_u>(chrono::steady_clock::now() - timer).count() << ",";
 
     auto endTime = steady_clock::now();
     if (world.rank() == 0) {
