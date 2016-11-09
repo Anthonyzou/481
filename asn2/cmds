@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
 
-mpich (){
-  pushd mpich-3.2
+mpich (){  pushd mpich-3.2
     ./mpich-3.2/configure --disable-fortran --prefix=$(pwd)/build
   popd
 }
 
-boost (){
-  PATH=$(pwd)/mpich-3.2/build/bin:$PATH
+boost (){  PATH=$(pwd)/mpich-3.2/build/bin:$PATH
   LD_LIBRARY_PATH=$(pwd)/mpich-3.2/build/lib:$LD_LIBRARY_PATH
   pushd boost_1_60_0
     ./bootstrap.sh
@@ -17,30 +15,46 @@ boost (){
   popd
 }
 
+# test run
 run (){
   ./release/asn1 -size 1000
   ./release/sequential -size 1000
   mpirun -npernode 4 release/asn2 -size 10000
 }
 
+# make binarys
 build (){
   make -C build
 }
 
+# build hostfile
 hostfile (){
   nodejs scaleway.js > hostfile
 }
 
+# cmake
 release(){
   cmake -DCMAKE_BUILD_TYPE=Release -B./build -H.
 }
 
+# test benchmark
 benchmark_test(){
   ./benchmark.sh 8000 1000 12000
 }
 
+# full benchmark
 benchmark(){
   ./benchmark.sh 40000000 100000 48000000
 }
 
-$@
+# Show a list of functions
+help () {
+    echo "functions available:"
+    typeset -f | awk '/ \(\) $/ && !/^main / {print $1}'
+}
+
+if [ "_$1" = "_" ]; then
+    help
+else
+    "$@"
+fi
