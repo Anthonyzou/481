@@ -17,11 +17,9 @@ boost (){
   popd
 }
 
-upload (){
-  nodejs scaleway.js > hostfile
-}
-
 run (){
+  ./release/asn1 -size 1000
+  ./release/sequential -size 1000
   mpirun -npernode 4 release/asn2 -size 10000
 }
 
@@ -38,11 +36,11 @@ release(){
 }
 
 benchmark_test(){
-    ./benchmark.sh 8000 1000 12000
+  ./benchmark.sh 8000 1000 12000
 }
 
 benchmark(){
-    ./benchmark.sh 40000000 100000 48000000
+  ./benchmark.sh 40000000 100000 48000000
 }
 
 $@
