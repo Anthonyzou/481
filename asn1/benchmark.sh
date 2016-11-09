@@ -26,7 +26,7 @@ printf "[" >> ${file}
 for elements in ${seq}; do
     printf "[" >> ${file}
     for i in $(seq 5); do
-      echo "$(./asn1test -size ${elements})," >> ${file}
+      echo "$(./sequential -size ${elements})," >> ${file}
     done
     echo "]," >> ${file}
 done
