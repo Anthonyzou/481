@@ -1,32 +1,45 @@
 #!/usr/bin/env bash
 
-seq=$(seq 8000000 1000000 12000000)
+seq=$(seq 800000 100000 1200000)
 
-numProcessors=$(($(nproc)+2))
+numProcessors=$(seq 4)
 echo ${seq}
 
-for processor in $(seq 1 1 ${numProcessors}); do
-    file="${processor}.psrs"
+for threads in $numProcessors; do
+    file="release/${threads}.mpipsrs"
     rm ${file}
     echo "["  >> ${file}
     for elements in ${seq}; do
         printf "["  >> ${file}
         for i in $(seq 5); do
-
-            echo "[$(mpirun -n ${processor} asn2 -size ${elements})]," >> ${file}
+            echo "[$(mpirun -npernode ${threads} release/asn2 -size ${elements})]," >> ${file}
         done
         printf "],"  >> ${file}
     done
     echo "]"  >> ${file}
 done
 
-file="seq.txt"
+for processor in $numProcessors; do
+    file="release/${processor}.psrs"
+    rm ${file}
+    echo "["  >> ${file}
+    for elements in ${seq}; do
+        printf "["  >> ${file}
+        for i in $(seq 5); do
+            echo "[$(./release/asn1 -threads ${processor} -size ${elements})]," >> ${file}
+        done
+        printf "],"  >> ${file}
+    done
+    echo "]"  >> ${file}
+done
+
+file="release/seq.txt"
 rm seq.txt
 printf "[" >> ${file}
 for elements in ${seq}; do
     printf "[" >> ${file}
     for i in $(seq 5); do
-      echo "$(./asn1test -size ${elements})," >> ${file}
+      echo "$(./release/sequential -size ${elements})," >> ${file}
     done
     echo "]," >> ${file}
 done

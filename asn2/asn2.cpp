@@ -3,7 +3,7 @@
 // cmput 481
 // nov 2016 - asn 2
 
-#include "main.h"
+#include "asn2.h"
 
 namespace mpi = boost::mpi;
 using namespace mpi;

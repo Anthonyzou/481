@@ -4,8 +4,7 @@ import ast
 import glob, os
 import matplotlib.pyplot as plt
 
-size = [8000000,9000000,10000000,11000000,12000000]
-processors = [1,2,3,4,5,6]
+size =  [x*1000000 for x in range(20,25)]
 psrs = []
 psrserr= []
 seq = []

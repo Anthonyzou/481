@@ -29,7 +29,7 @@ run(){
 }
 
 build(){
-  make -C build all
+  make -C build
 }
 
 hostfile(){
