@@ -24,25 +24,24 @@ run (){
   mpirun -hostfile hostfile -npernode 4 release/asn2 -size 10000
 }
 
-# make binarys
-build (){
-  make -C build
-}
-
 # build hostfile
 hostfile (){
   nodejs scaleway.js > hostfile
-}
-
-# cmake
-release(){
-  cmake -DCMAKE_BUILD_TYPE=Release -B./build -H.
 }
 
 upload(){
   while IFS='' read -r line || [[ -n "$line" ]]; do
     rsync -a ~/481 $line:481
   done < hostfile
+}
+
+# make binarys
+build (){
+  cmake -DCMAKE_BUILD_TYPE=Release -B./build -H.
+  make -C build
+  hostfile
+  run
+  upload
 }
 
 # test benchmark
