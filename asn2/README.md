@@ -1,9 +1,16 @@
+    Anthony Ou
+    SID: 1248175
+    CSID: 81995
+    CMPUT 481
+    Fall - 2016
 
-## OpenMPI is epxected to be installed on the system already.
+# Building
 
-Then to build boost and then the program
+To build the system
+run `./cmds build`
+The resulting binaryes will be in the release folder
 
-run `./build.sh`
-
-running `make` in the `build` dirtectory will make the binary in the `release`
-folder.
+# Requirements
+boost
+boost-libs
+mpich2 or openmpi

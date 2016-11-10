@@ -35,10 +35,14 @@ upload(){
   done < hostfile
 }
 
-# make binarys
-build (){
+build(){
   cmake -DCMAKE_BUILD_TYPE=Release -B./build -H.
   make -C build
+}
+
+# make binarys
+release (){
+  build
   hostfile
   run
   upload
