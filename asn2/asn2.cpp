@@ -49,8 +49,10 @@ void phase3(const int from, const int end, const communicator world, vec &pivots
     vector<request> requests;
     for (auto &pivot : pivots) {
         auto nextPoint = partition(movingIt, endPoint, [pivot](vecType em) { return em <= pivot; });
-        requests.push_back(world.isend(idx, idx, vec(movingIt, nextPoint)));
+        vec tmp(movingIt, nextPoint);
+        requests.push_back(world.isend(idx, idx, tmp));
         movingIt = nextPoint;
+        cout << world.rank() << " chunk "<<tmp.size() << endl;
         idx++;
     }
 

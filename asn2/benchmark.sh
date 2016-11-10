@@ -12,7 +12,7 @@ for threads in $numProcessors; do
     for elements in ${seq}; do
         printf "["  >> ${file}
         for i in $(seq 5); do
-            echo "[$(mpirun -npernode ${threads} release/asn2 -size ${elements})]," >> ${file}
+            echo "[$(mpirun -hostfile hostfile -npernode ${threads} release/asn2 -size ${elements})]," >> ${file}
         done
         printf "],"  >> ${file}
     done
