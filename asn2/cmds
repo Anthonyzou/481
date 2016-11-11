@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -o xtrace
 
 mpich (){
   pushd mpich-3.2

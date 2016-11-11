@@ -30,7 +30,8 @@ void phase2(const communicator world, vector<vec> &phase1Results, vec &pivots) {
     for (auto &proc : phase1Results)
         sortedMerge(temp, proc);
 
-    for (auto i = world.size(), k = 0; k++ < world.size() - 1; i += world.size())
+    const int p = (int) floor(world.size()/2);
+    for (auto i = world.size()+p, k = 1; k++ < world.size(); i = (k*world.size())+p)
         pivots.push_back(temp[i]);
 
     // Broadcast begins phase 3
@@ -52,7 +53,6 @@ void phase3(const int from, const int end, const communicator world, vec &pivots
         vec tmp(movingIt, nextPoint);
         requests.push_back(world.isend(idx, idx, tmp));
         movingIt = nextPoint;
-        cout << world.rank() << " chunk "<<tmp.size() << endl;
         idx++;
     }
 

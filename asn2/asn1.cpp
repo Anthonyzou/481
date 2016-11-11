@@ -28,7 +28,6 @@ void worker(const int id, promise<vec> prom, const int from, const int end) {
     prom.set_value(phase1Arr);
 
     //PHASE 3 partition and assign
-
     auto idx = 0;
     auto pivots = phase2Vector.get();
     auto PHASE3START = chrono::steady_clock::now();
@@ -74,8 +73,9 @@ int main(int argc, char **argv) {
     sort(results.begin(), results.end());
 
     //PHASE 2 GET PIVOT POINTS
-    auto k = 0;
-    for (auto i = PROCESSORS; k++ < PROCESSORS - 1; i += PROCESSORS)
+    auto k = 1;
+    const int p = (int) floor(PROCESSORS/2);
+    for (auto i = PROCESSORS+p; k++ < PROCESSORS; i = (PROCESSORS*k)+p)
         subResults.push_back(results[i]);
 
     phase2Promise.set_value(subResults);

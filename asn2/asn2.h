@@ -30,18 +30,19 @@ typedef chrono::microseconds time_u;
 
 // FUNCTION PROTOTYPES
 vec randomArray(unsigned long size);
-
 void init(int argc, char **argv);
-
-template<typename t>
-inline
-void sortedMerge(vector<t> &, vector<t> &);
+template<typename t> inline void sortedMerge(vector<t> &, vector<t> &);
 
 // GLOBAL CONSTANTS
 vecType numElements, seed = 42, totalElements = 100000;
 int perProcess, sampleIntervals;
 vec randomArr;
 
+template<typename t>
+void printArray(vector<t> v){
+    for(auto &i:v) cout << i << ' ';
+    cout << endl;
+}
 // IMPLMENTATIONS
 vec randomArray(unsigned long size) {
     default_random_engine generator;
