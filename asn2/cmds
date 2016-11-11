@@ -37,8 +37,8 @@ upload(){
 }
 
 build(){
+  rm -rf release build
   cmake -DCMAKE_BUILD_TYPE=Release -B./build -H.
-  make -C build clean
   make -C build
 }
 
