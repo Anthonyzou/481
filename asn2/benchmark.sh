@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 seq=$(seq $1 $2 $3)
 
 numProcessors=$(seq 4)

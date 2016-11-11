@@ -1,7 +1,6 @@
     Anthony Ou
-    SID: 1248175
-    CSID: 81995
     CMPUT 481
+    ASN 2
     Fall - 2016
 
 # Building
