@@ -1,5 +1,3 @@
-//
-//
 // Created by azou on 28/09/16.
 #include <iostream>
 #include <thread>

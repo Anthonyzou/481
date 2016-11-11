@@ -1,7 +1,6 @@
 // Anthony Ou
-// 1248175
-// cmput 481
-// nov 2016 - asn 2
+// CMPUT 481
+// Nov 2016 - asn 2
 
 #include "asn2.h"
 

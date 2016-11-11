@@ -1,6 +1,5 @@
 // Anthony Ou
-// 1248175
-// cmput 481
+// CMPUT 481
 // Oct 5, 2016
 
 #pragma once
