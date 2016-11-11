@@ -57,7 +57,7 @@ benchmark_test(){
 
 # full benchmark
 benchmark(){
-  ./benchmark.sh 30000000 1000000 34000000
+  ./benchmark.sh 24000000 1000000 28000000
 }
 
 # Show a list of functions
