@@ -13,13 +13,13 @@ using namespace chrono;
 void phase1(const int from, const int end, communicator world, vector<vec> &phase1Results) {
     vec phase1;
     sort(randomArr.begin() + from, randomArr.begin() + end);
-    for (auto i = from; i < end; i += sampleIntervals)
-        phase1.push_back(randomArr[i]);
+    for (auto i = randomArr.begin() + from; i < randomArr.begin() + end; i += sampleIntervals)
+        phase1.push_back(*i);
 
     if (world.rank() == 0)
         gather(world, phase1, phase1Results, 0);
     else
-        gather(world, phase1Results, 0);
+        gather(world, phase1, 0);
 }
 
 void phase2(const communicator world, vector<vec> &phase1Results, vec &pivots) {
@@ -30,8 +30,9 @@ void phase2(const communicator world, vector<vec> &phase1Results, vec &pivots) {
         sortedMerge(temp, proc);
 
     const int p = (int) floor(world.size()/2);
-    for (auto i = world.size()+p, k = 1; k++ < world.size(); i = (k*world.size())+p)
+    for (auto i = world.size()+p, k = 1; k++ < world.size(); i += world.size())
         pivots.push_back(temp[i]);
+
 
     // Broadcast begins phase 3
     broadcast(world, pivots, 0);
@@ -54,7 +55,6 @@ void phase3(const int from, const int end, const communicator world, vec &pivots
     }
 
     requests.push_back(world.isend(idx, idx, vec(movingIt, endPoint)));
-
 }
 
 
