@@ -20,8 +20,8 @@ boost (){
 
 # test run
 run (){
-  ./release/sequential -size 1000
-  mpirun -hostfile hostfile -npernode 4 release/asn2 -size 10000
+  ./release/sequential -size 10000
+  mpirun -npernode 4 release/asn2 -size 10000
 }
 
 # build hostfile

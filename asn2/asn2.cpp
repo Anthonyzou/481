@@ -66,12 +66,14 @@ void phase4(const communicator world, vec &finalResults, vector<request> & reque
         sortedMerge(result, temp);
     }
     wait_all(requests.begin(), requests.end());
+    request r = world.isend(0, world.rank(), result);
     if (world.rank() == 0) {
-        vector<vec> all_numbers;
-        gather(world, result, all_numbers, 0);
-        for (auto &nums : all_numbers) sortedMerge(finalResults, nums);
-    } else
-        gather(world, result, 0);
+        for (int i = 0; i < world.size(); i++){
+            world.recv(i, i, temp);
+            finalResults.insert(finalResults.end(), temp.begin(), temp.end());
+        }
+    }
+    r.wait();
 }
 
 int main(int argc, char **argv) {
