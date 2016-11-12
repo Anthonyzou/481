@@ -37,8 +37,7 @@ void phase2(const communicator world, vector<vec> &phase1Results, vec &pivots) {
     broadcast(world, pivots, 0);
 }
 
-void phase3(const int from, const int end, const communicator world, vec &pivots, vec &result) {
-    vec temp;
+void phase3(const int from, const int end, const communicator world, vec &pivots, vector<request> &requests) {
     // Recieve a broadcast of the pivots
     broadcast(world, pivots, 0);
 
@@ -46,7 +45,6 @@ void phase3(const int from, const int end, const communicator world, vec &pivots
     auto idx = 0;
     auto movingIt = randomArr.begin() + from;
     auto endPoint = randomArr.begin() + end;
-    vector<request> requests;
     for (auto &pivot : pivots) {
         auto nextPoint = partition(movingIt, endPoint, [pivot](vecType em) { return em <= pivot; });
         vec tmp(movingIt, nextPoint);
@@ -57,15 +55,16 @@ void phase3(const int from, const int end, const communicator world, vec &pivots
 
     requests.push_back(world.isend(idx, idx, vec(movingIt, endPoint)));
 
+}
+
+void phase4(const communicator world, vec &finalResults, vector<request> & requests) {
+    vec temp, result;
     // recieve the partitions and then concat them.
     for (auto messages = 0; messages < world.size(); messages++) {
         world.recv(any_source, world.rank(), temp);
         sortedMerge(result, temp);
     }
     wait_all(requests.begin(), requests.end());
-}
-
-void phase4(const communicator world, const vec &result, vec &finalResults) {
     if (world.rank() == 0) {
         vector<vec> all_numbers;
         gather(world, result, all_numbers, 0);
@@ -111,13 +110,14 @@ int main(int argc, char **argv) {
 
     // PHASE 3
     vec result, finalResults;
+    vector<request> requests;
     if (world.rank() == 0) timer = steady_clock::now();
-    phase3(from, end, world, pivots, result);
+    phase3(from, end, world, pivots, requests);
     if (world.rank() == 0) cout << duration_cast<time_u>(chrono::steady_clock::now() - timer).count() << ",";
 
     // PHASE 4
     if (world.rank() == 0) timer = steady_clock::now();
-    phase4(world, result, finalResults);
+    phase4(world, finalResults, requests);
     if (world.rank() == 0) cout << duration_cast<time_u>(chrono::steady_clock::now() - timer).count() << ",";
 
     auto endTime = steady_clock::now();
