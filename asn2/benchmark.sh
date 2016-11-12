@@ -18,20 +18,6 @@ for threads in $numProcessors; do
     echo "]"  >> ${file}
 done
 
-for processor in $numProcessors; do
-    file="release/${processor}.psrs"
-    rm ${file}
-    echo "["  >> ${file}
-    for elements in ${seq}; do
-        printf "["  >> ${file}
-        for i in $(seq 5); do
-            echo "[$(./release/asn1 -threads ${processor} -size ${elements})]," >> ${file}
-        done
-        printf "],"  >> ${file}
-    done
-    echo "]"  >> ${file}
-done
-
 file="release/seq.txt"
 rm seq.txt
 printf "[" >> ${file}

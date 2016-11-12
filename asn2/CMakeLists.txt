@@ -18,8 +18,5 @@ set(SOURCE_FILES asn2.cpp)
 add_executable(asn2 ${SOURCE_FILES})
 target_link_libraries(asn2 ${Boost_LIBRARIES} ${MPI_CXX_LIBRARIES})
 
-set(SOURCE_FILES asn1.cpp)
-add_executable(asn1 ${SOURCE_FILES})
-
 set(SOURCE_FILES_TEST test.cpp)
 add_executable(sequential ${SOURCE_FILES_TEST})

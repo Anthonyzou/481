@@ -25,7 +25,7 @@ plt.ylabel('Runtime (seconds)')
 plt.title('Runtime of sequential merge sort')
 plt.savefig("figure1.png")
 
-for file in sorted(glob.glob("*.psrs")):
+for file in sorted(glob.glob("*.mpipsrs")):
     with open(file) as f:
         totals = []
         phases = []

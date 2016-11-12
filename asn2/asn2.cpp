@@ -39,7 +39,7 @@ void phase2(const communicator world, vector<vec> &phase1Results, vec &pivots) {
 
 void phase3(const int from, const int end, const communicator world, vec &pivots, vector<request> &requests) {
     // Recieve a broadcast of the pivots
-    broadcast(world, pivots, 0);
+    if (world.rank() != 0) broadcast(world, pivots, 0);
 
     // Build partitions and send them to the other processes
     auto idx = 0;

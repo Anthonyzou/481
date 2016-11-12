@@ -20,7 +20,6 @@ boost (){
 
 # test run
 run (){
-  ./release/asn1 -size 1000
   ./release/sequential -size 1000
   mpirun -hostfile hostfile -npernode 4 release/asn2 -size 10000
 }
