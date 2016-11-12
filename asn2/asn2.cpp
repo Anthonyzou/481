@@ -65,14 +65,13 @@ void phase4(const communicator world, vec &finalResults, vector<request> & reque
         sortedMerge(result, temp);
     }
     wait_all(requests.begin(), requests.end());
-    request r = world.isend(0, world.rank(), result);
+    world.isend(0, world.rank(), result);
     if (world.rank() == 0) {
         for (int i = 0; i < world.size(); i++){
             world.recv(i, i, temp);
             finalResults.insert(finalResults.end(), temp.begin(), temp.end());
         }
     }
-    r.wait();
 }
 
 int main(int argc, char **argv) {
@@ -81,8 +80,8 @@ int main(int argc, char **argv) {
     communicator world;
 
     if (world.rank() == 0)
-//        randomArr = randomArray(totalElements);
-        randomArr = {16,2,17,24,33,28,30,1,0,27,9,25,34,23,19,18,11,7, 21,13,8,35,12,29,6,3,4,14,22,15,32,10,26,31,20,5};
+        randomArr = randomArray(totalElements);
+//        randomArr = {16,2,17,24,33,28,30,1,0,27,9,25,34,23,19,18,11,7, 21,13,8,35,12,29,6,3,4,14,22,15,32,10,26,31,20,5};
 
     // Give the array to everyone
     broadcast(world, randomArr, 0);
