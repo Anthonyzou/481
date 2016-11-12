@@ -3,6 +3,8 @@ import numpy as np
 import ast
 import glob, os
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+mpl.rcParams["savefig.directory"] = ((os.path.dirname(__file__)))
 
 size =  [x*1000000 for x in range(8,13)]
 psrs = []
