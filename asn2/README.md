@@ -7,7 +7,7 @@
 
 To build the system
 run `./cmds build`
-The resulting binaryes will be in the release folder
+The resulting binaries will be in the release folder
 
 # Requirements
 boost

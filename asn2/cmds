@@ -60,7 +60,7 @@ benchmark(){
 }
 
 maketar(){
-  tar -czvf asn2.tar.gz --exclude='build' --exclude='release' --exclude='.[^/]*' .
+  tar -czvf asn2.tar.gz --exclude='build' --exclude='release' --exclude='.[^/]*'  --exclude='*.tar.gz' .
 }
 
 graphs(){
