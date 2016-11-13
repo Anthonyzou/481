@@ -59,6 +59,14 @@ benchmark(){
   ./benchmark.sh 24000000 1000000 28000000
 }
 
+maketar(){
+  tar -czvf asn2.tar.gz --exclude='build' --exclude='release' --exclude='.[^/]*' .
+}
+
+graphs(){
+  python release/graph.py
+}
+
 # Show a list of functions
 help () {
     echo "functions available:"

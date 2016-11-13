@@ -14,7 +14,7 @@ seq = []
 totalsPSRS = []
 speedup = []
 #===========================================
-with open("seq.txt") as f:
+with open("stats/seq.txt") as f:
     for idx, i in enumerate(ast.literal_eval(f.read())):
         a = np.matrix(i)
         b=int(np.average(a))/1000000
@@ -25,9 +25,9 @@ plt.plot (size, seq )
 plt.xlabel('Elements')
 plt.ylabel('Runtime (seconds)')
 plt.title('Runtime of sequential merge sort')
-plt.savefig("figure1.png")
+plt.savefig("stats/figure1.png")
 #===========================================
-for file in sorted(glob.glob("*.mpipsrs")):
+for file in sorted(glob.glob("stats/*.mpipsrs")):
     with open(file) as f:
         totals = []
         phases = []
@@ -52,7 +52,7 @@ plt.xlabel('Processes per node')
 plt.ylabel('Speedup')
 plt.title('Speedup by elements and processes per node')
 plt.legend([str(i)+' elements'for i in size]).draggable()
-plt.savefig("figure2.png")
+plt.savefig("stats/figure2.png")
 #===========================================
 plt.figure()
 for idx, i in enumerate(totalsPSRS):
@@ -61,7 +61,7 @@ plt.xlabel('Elements')
 plt.ylabel('Time (Seconds)')
 plt.title('Execution time for N elements and K processes per node')
 plt.legend([str(i)+' per node'for i in processors]).draggable()
-plt.savefig("figure4.png")
+plt.savefig("stats/figure4.png")
 #===========================================
 plt.figure()
 bar_width = 0.35
@@ -76,5 +76,5 @@ plt.xticks(range(4), phases)
 plt.xlabel('phases')
 plt.ylabel('time spent')
 plt.title('Time spent in seconds on each phase for 12 million elements')
-plt.savefig("figure3.png")
+plt.savefig("stats/figure3.png")
 plt.show()
