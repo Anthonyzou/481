@@ -53,7 +53,6 @@ void phase3(const int from, const int end, const communicator world, vec &pivots
     requests.push_back(world.isend(idx, idx, vec(movingIt, endPoint)));
 }
 
-
 void phase4(const communicator world, vec &finalResults, vector<request> & requests) {
     vec temp, result;
     // recieve the partitions and then concat them.

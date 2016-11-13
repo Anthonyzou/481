@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 mpl.rcParams["savefig.directory"] = ((os.path.dirname(__file__)))
 
-size =  [x*1000000 for x in range(8,13)]
+size =  [x*1000000 for x in range(24,29)]
+print(size)
 psrs = []
 processors = [1,2,3,4]
 psrserr= []
@@ -25,7 +26,6 @@ plt.plot (size, seq )
 plt.xlabel('Elements')
 plt.ylabel('Runtime (seconds)')
 plt.title('Runtime of sequential merge sort')
-plt.savefig("stats/figure1.png")
 #===========================================
 for file in sorted(glob.glob("stats/*.mpipsrs")):
     with open(file) as f:
@@ -42,7 +42,6 @@ for file in sorted(glob.glob("stats/*.mpipsrs")):
         psrs.append(phases)
         psrserr.append(phaseserr)
         totalsPSRS.append(totals)
-
 plt.figure()
 err = (np.matrix(phaseserr).transpose())
 speedup = (seq/np.matrix(totalsPSRS)).transpose()
@@ -52,7 +51,6 @@ plt.xlabel('Processes per node')
 plt.ylabel('Speedup')
 plt.title('Speedup by elements and processes per node')
 plt.legend([str(i)+' elements'for i in size]).draggable()
-plt.savefig("stats/figure2.png")
 #===========================================
 plt.figure()
 for idx, i in enumerate(totalsPSRS):
@@ -61,20 +59,20 @@ plt.xlabel('Elements')
 plt.ylabel('Time (Seconds)')
 plt.title('Execution time for N elements and K processes per node')
 plt.legend([str(i)+' per node'for i in processors]).draggable()
-plt.savefig("stats/figure4.png")
 #===========================================
 plt.figure()
-bar_width = 0.35
+bar_width = 0.2
 phases = ["phase 1","phase 2","phase 3","phase 4",]
+tmp = psrs[1][3][:-1]
+plt.bar(np.arange(4)-bar_width,tmp, bar_width, align='center', label="2 processes per node", color='g', yerr=psrserr[1][3][:-1])
 tmp = psrs[2][3][:-1]
-plt.bar(np.arange(4)-bar_width,tmp, bar_width, align='center', label="3 Threads", color='r', yerr=psrserr[2][3][:-1])
+plt.bar(np.arange(4),tmp, bar_width, align='center', label="3 processes per node", color='r', yerr=psrserr[2][3][:-1])
 tmp = psrs[3][3][:-1]
-plt.bar(np.arange(4),tmp, bar_width, align='center', label="4 Threads", color='b', yerr=psrserr[3][3][:-1])
+plt.bar(np.arange(4)+bar_width,tmp, bar_width, align='center', label="4 processes per node", color='b', yerr=psrserr[3][3][:-1])
 
 plt.legend().draggable()
 plt.xticks(range(4), phases)
-plt.xlabel('phases')
-plt.ylabel('time spent')
-plt.title('Time spent in seconds on each phase for 12 million elements')
-plt.savefig("stats/figure3.png")
+plt.xlabel('Phases')
+plt.ylabel('Time Spent (Seconds)')
+plt.title('Time spent in seconds on each phase for 28 million elements')
 plt.show()

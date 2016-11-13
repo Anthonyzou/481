@@ -64,6 +64,7 @@ maketar(){
 }
 
 graphs(){
+  rm stats/*.png
   python release/graph.py
 }
 
