@@ -1,8 +1,3 @@
-    Anthony Ou
-    CMPUT 481
-    ASN 2
-    Fall - 2016
-
 # Building
 
 To build the system
