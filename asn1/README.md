@@ -1,7 +1,3 @@
-Anthony Ou
-12348175
-CMPUT 481
-Fall 2016
 
 Command line arguments
 
