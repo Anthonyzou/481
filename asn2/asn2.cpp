@@ -81,6 +81,8 @@ int main(int argc, char **argv) {
 //        randomArr = {16,2,17,24,33,28,30,1,0,27,9,25,34,23,19,18,11,7, 21,13,8,35,12,29,6,3,4,14,22,15,32,10,26,31,20,5};
 
     // Give the array to everyone
+    // Rank 0 will send the random array above. Other processes will recieve the value and
+    // assign it to the variable randomArr.
     broadcast(world, randomArr, 0);
 
     // KEEP THIS BELOW THE BROADCAST
